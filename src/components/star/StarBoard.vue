@@ -125,7 +125,7 @@ const rays = computed(() => {
     // 中心对称没有线，画一个十字准星
     const cx = px(s.hx / 2)
     const cy = px(s.hy / 2)
-    const L = S * 0.22
+    const L = S * 0.3
     return [seg(cx, cy - L, cx, cy + L), seg(cx - L, cy, cx + L, cy)]
   }
   const c = s.c
@@ -352,13 +352,14 @@ function handle({ cx, cy }) {
 /* 残星：空心细环 + 灰蓝 + 缓慢漂移，形状与真源星不同 */
 .stray {
   position: absolute;
-  width: 30rpx;
-  height: 30rpx;
-  margin-left: -15rpx;
-  margin-top: -15rpx;
+  width: 34rpx;
+  height: 34rpx;
+  margin-left: -17rpx;
+  margin-top: -17rpx;
   border-radius: 50%;
-  border: 2rpx dashed rgba(140, 158, 196, 0.65);
-  opacity: 0.85;
+  border: 3rpx dashed rgba(152, 170, 208, 0.82);
+  opacity: 0.95;
+  box-shadow: 0 0 14rpx rgba(120, 142, 184, 0.28);
   animation: drift 5.5s ease-in-out infinite;
 }
 .stray-core {
@@ -370,7 +371,7 @@ function handle({ cx, cy }) {
   margin-left: -3rpx;
   margin-top: -3rpx;
   border-radius: 50%;
-  background: rgba(140, 158, 196, 0.55);
+  background: rgba(152, 170, 208, 0.62);
 }
 @keyframes drift {
   0% { transform: translate(0, 0); }
