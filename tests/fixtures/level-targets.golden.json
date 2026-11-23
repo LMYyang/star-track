@@ -1,0 +1,642 @@
+{
+  "version": "1.0",
+  "count": 40,
+  "levels": [
+    {
+      "id": 1,
+      "name": "启航",
+      "chapter": 1,
+      "board": 5,
+      "sym": "v",
+      "arrows": false,
+      "targets": [
+        "3,1",
+        "4,4"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "初辉",
+      "chapter": 1,
+      "board": 5,
+      "sym": "v",
+      "arrows": false,
+      "targets": [
+        "3,0",
+        "3,2",
+        "4,3"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "双生",
+      "chapter": 1,
+      "board": 5,
+      "sym": "v",
+      "arrows": false,
+      "targets": [
+        "4,0",
+        "4,2",
+        "4,3",
+        "4,4"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "天平",
+      "chapter": 1,
+      "board": 7,
+      "sym": "v",
+      "arrows": false,
+      "targets": [
+        "4,0",
+        "5,6",
+        "6,2",
+        "6,4"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "镜湖",
+      "chapter": 1,
+      "board": 7,
+      "sym": "v",
+      "arrows": false,
+      "targets": [
+        "4,0",
+        "4,5",
+        "5,3",
+        "6,1",
+        "6,6"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "星幕",
+      "chapter": 1,
+      "board": 7,
+      "sym": "v",
+      "arrows": false,
+      "targets": [
+        "4,0",
+        "4,4",
+        "4,6",
+        "6,1",
+        "6,3",
+        "6,5"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "地平",
+      "chapter": 2,
+      "board": 5,
+      "sym": "h",
+      "arrows": false,
+      "targets": [
+        "0,3",
+        "2,4",
+        "4,4"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "海平线",
+      "chapter": 2,
+      "board": 7,
+      "sym": "h",
+      "arrows": false,
+      "targets": [
+        "1,6",
+        "2,4",
+        "4,6",
+        "6,5"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "晨昏",
+      "chapter": 2,
+      "board": 7,
+      "sym": "h",
+      "arrows": false,
+      "targets": [
+        "0,4",
+        "2,6",
+        "3,4",
+        "4,6",
+        "6,4"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "极光",
+      "chapter": 2,
+      "board": 7,
+      "sym": "h",
+      "arrows": false,
+      "targets": [
+        "0,6",
+        "1,4",
+        "2,6",
+        "3,4",
+        "4,6",
+        "5,4"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "银河",
+      "chapter": 2,
+      "board": 9,
+      "sym": "h",
+      "arrows": false,
+      "targets": [
+        "1,7",
+        "3,6",
+        "4,8",
+        "6,5",
+        "7,7",
+        "8,5"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "子午",
+      "chapter": 2,
+      "board": 9,
+      "sym": "h",
+      "arrows": false,
+      "targets": [
+        "0,5",
+        "1,7",
+        "2,5",
+        "4,8",
+        "5,5",
+        "6,7",
+        "8,6"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "斜光",
+      "chapter": 3,
+      "board": 5,
+      "sym": "d1",
+      "arrows": false,
+      "targets": [
+        "2,1",
+        "4,0",
+        "4,3"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "星轨",
+      "chapter": 3,
+      "board": 7,
+      "sym": "d1",
+      "arrows": false,
+      "targets": [
+        "1,0",
+        "3,0",
+        "4,2",
+        "6,1"
+      ]
+    },
+    {
+      "id": 15,
+      "name": "折光",
+      "chapter": 3,
+      "board": 7,
+      "sym": "d1",
+      "arrows": false,
+      "targets": [
+        "1,0",
+        "4,0",
+        "4,2",
+        "5,4",
+        "6,1"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "反照",
+      "chapter": 3,
+      "board": 7,
+      "sym": "d2",
+      "arrows": false,
+      "targets": [
+        "3,4",
+        "4,6",
+        "5,2",
+        "5,4"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "斜塔",
+      "chapter": 3,
+      "board": 9,
+      "sym": "d2",
+      "arrows": false,
+      "targets": [
+        "2,7",
+        "4,7",
+        "5,5",
+        "8,2",
+        "8,7"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "光栅",
+      "chapter": 3,
+      "board": 9,
+      "sym": "d1",
+      "arrows": false,
+      "targets": [
+        "1,0",
+        "3,2",
+        "4,0",
+        "7,1",
+        "8,3",
+        "8,7"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "星心",
+      "chapter": 4,
+      "board": 7,
+      "sym": "p",
+      "arrows": false,
+      "targets": [
+        "4,5",
+        "6,3",
+        "6,6"
+      ]
+    },
+    {
+      "id": 20,
+      "name": "回旋",
+      "chapter": 4,
+      "board": 7,
+      "sym": "p",
+      "arrows": false,
+      "targets": [
+        "4,0",
+        "4,2",
+        "4,4",
+        "6,0"
+      ]
+    },
+    {
+      "id": 21,
+      "name": "双子",
+      "chapter": 4,
+      "board": 7,
+      "sym": "p",
+      "arrows": false,
+      "targets": [
+        "4,0",
+        "4,2",
+        "4,5",
+        "6,0",
+        "6,5"
+      ]
+    },
+    {
+      "id": 22,
+      "name": "倒影",
+      "chapter": 4,
+      "board": 9,
+      "sym": "p",
+      "arrows": false,
+      "targets": [
+        "5,2",
+        "6,0",
+        "7,4",
+        "7,8",
+        "8,0",
+        "8,6"
+      ]
+    },
+    {
+      "id": 23,
+      "name": "晕轮",
+      "chapter": 4,
+      "board": 9,
+      "sym": "p",
+      "arrows": false,
+      "targets": [
+        "5,1",
+        "5,8",
+        "6,4",
+        "7,0",
+        "7,6",
+        "8,2",
+        "8,8"
+      ]
+    },
+    {
+      "id": 24,
+      "name": "深渊",
+      "chapter": 4,
+      "board": 9,
+      "sym": "p",
+      "arrows": false,
+      "targets": [
+        "5,0",
+        "5,2",
+        "5,4",
+        "6,7",
+        "7,3",
+        "8,1",
+        "8,5",
+        "8,7"
+      ]
+    },
+    {
+      "id": 25,
+      "name": "十字",
+      "chapter": 5,
+      "board": 7,
+      "sym": "cross",
+      "arrows": false,
+      "targets": [
+        "0,5",
+        "2,4",
+        "2,6",
+        "4,0",
+        "4,2",
+        "4,4",
+        "4,6",
+        "6,1",
+        "6,5"
+      ]
+    },
+    {
+      "id": 26,
+      "name": "风车",
+      "chapter": 5,
+      "board": 7,
+      "sym": "cross",
+      "arrows": false,
+      "targets": [
+        "1,4",
+        "1,6",
+        "2,4",
+        "2,6",
+        "4,0",
+        "4,2",
+        "4,4",
+        "4,6",
+        "5,0",
+        "5,2",
+        "5,4",
+        "5,6"
+      ]
+    },
+    {
+      "id": 27,
+      "name": "四象",
+      "chapter": 5,
+      "board": 9,
+      "sym": "cross",
+      "arrows": false,
+      "targets": [
+        "1,5",
+        "1,7",
+        "3,5",
+        "3,7",
+        "5,1",
+        "5,3",
+        "5,5",
+        "5,7",
+        "7,1",
+        "7,3",
+        "7,5",
+        "7,7"
+      ]
+    },
+    {
+      "id": 28,
+      "name": "菱镜",
+      "chapter": 5,
+      "board": 9,
+      "sym": "cross",
+      "arrows": false,
+      "targets": [
+        "1,5",
+        "1,6",
+        "2,5",
+        "3,5",
+        "3,8",
+        "5,0",
+        "5,3",
+        "5,5",
+        "5,8",
+        "6,3",
+        "6,5",
+        "7,2",
+        "7,3",
+        "7,5",
+        "7,6"
+      ]
+    },
+    {
+      "id": 29,
+      "name": "天秤",
+      "chapter": 5,
+      "board": 7,
+      "sym": "cross",
+      "arrows": false,
+      "targets": [
+        "0,4",
+        "0,5",
+        "0,6",
+        "2,5",
+        "2,6",
+        "4,0",
+        "4,1",
+        "4,5",
+        "4,6",
+        "6,0",
+        "6,1",
+        "6,2",
+        "6,4",
+        "6,5",
+        "6,6"
+      ]
+    },
+    {
+      "id": 30,
+      "name": "万花筒",
+      "chapter": 5,
+      "board": 9,
+      "sym": "cross",
+      "arrows": false,
+      "targets": [
+        "0,5",
+        "0,6",
+        "0,7",
+        "0,8",
+        "3,7",
+        "5,1",
+        "5,7",
+        "8,0",
+        "8,1",
+        "8,2",
+        "8,3",
+        "8,5",
+        "8,6",
+        "8,7",
+        "8,8"
+      ]
+    },
+    {
+      "id": 31,
+      "name": "残星",
+      "chapter": 6,
+      "board": 7,
+      "sym": "v",
+      "arrows": false,
+      "targets": [
+        "4,5",
+        "5,0",
+        "6,3"
+      ]
+    },
+    {
+      "id": 32,
+      "name": "浮尘",
+      "chapter": 6,
+      "board": 7,
+      "sym": "v",
+      "arrows": false,
+      "targets": [
+        "4,6",
+        "5,0",
+        "6,2",
+        "6,5"
+      ]
+    },
+    {
+      "id": 33,
+      "name": "暗涌",
+      "chapter": 6,
+      "board": 9,
+      "sym": "h",
+      "arrows": false,
+      "targets": [
+        "0,5",
+        "1,7",
+        "3,6",
+        "7,5"
+      ]
+    },
+    {
+      "id": 34,
+      "name": "迷航",
+      "chapter": 6,
+      "board": 7,
+      "sym": "d1",
+      "arrows": false,
+      "targets": [
+        "4,1",
+        "4,3",
+        "6,4"
+      ]
+    },
+    {
+      "id": 35,
+      "name": "星尘",
+      "chapter": 6,
+      "board": 9,
+      "sym": "d2",
+      "arrows": false,
+      "targets": [
+        "3,8",
+        "5,6",
+        "7,3",
+        "8,7"
+      ]
+    },
+    {
+      "id": 36,
+      "name": "黑洞",
+      "chapter": 6,
+      "board": 9,
+      "sym": "p",
+      "arrows": false,
+      "targets": [
+        "5,3",
+        "5,5",
+        "6,1",
+        "7,7",
+        "8,3"
+      ]
+    },
+    {
+      "id": 37,
+      "name": "星矢",
+      "chapter": 7,
+      "board": 7,
+      "sym": "v",
+      "arrows": true,
+      "targets": [
+        "4,5,R",
+        "6,1,U",
+        "6,3,L",
+        "6,6,D"
+      ]
+    },
+    {
+      "id": 38,
+      "name": "风向",
+      "chapter": 7,
+      "board": 7,
+      "sym": "h",
+      "arrows": true,
+      "targets": [
+        "1,5,U",
+        "3,6,U",
+        "4,4,U",
+        "5,6,L"
+      ]
+    },
+    {
+      "id": 39,
+      "name": "斜矢",
+      "chapter": 7,
+      "board": 7,
+      "sym": "d1",
+      "arrows": true,
+      "targets": [
+        "3,2,U",
+        "5,0,D",
+        "6,3,D"
+      ]
+    },
+    {
+      "id": 40,
+      "name": "万象",
+      "chapter": 7,
+      "board": 9,
+      "sym": "cross",
+      "arrows": true,
+      "targets": [
+        "0,8,L",
+        "1,6,D",
+        "3,8,R",
+        "5,0,L",
+        "5,8,L",
+        "7,2,U",
+        "7,6,D",
+        "8,0,R",
+        "8,8,R"
+      ]
+    }
+  ]
+}

@@ -10,7 +10,9 @@
     "validate:levels": "node scripts/validate-levels.mjs",
     "gen:sounds": "node scripts/gen-sounds.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "gen:golden": "node scripts/gen-golden.mjs",
+    "verify": "npm run validate:levels && npm test && npm run build:h5"
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-5030420261029002",

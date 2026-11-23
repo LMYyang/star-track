@@ -14,8 +14,10 @@
 ```bash
 npm install
 npm run dev:h5        # 浏览器开发
-npm run test          # 133 个用例（核心逻辑 + 关卡数据 + 组件 + 页面接线）
+npm run test          # 219 个用例（核心逻辑 + 关卡数据 + 目标集快照 + 40 关演练 + 组件 + 页面接线）
 npm run validate:levels   # 40 关数据体检表
+npm run verify        # CI 同款：关卡校验 + 全部测试 + H5 构建
+npm run gen:golden    # 关卡目标集快照更新（改了关卡数据后手动跑）
 npm run build:h5      # 产物 dist/build/h5
 npm run build:server  # 产物 server/server.bundle.mjs（自包含）
 node server/server.bundle.mjs   # 同端口托管 dist/build/h5
@@ -24,6 +26,8 @@ node server/server.bundle.mjs   # 同端口托管 dist/build/h5
 ## 测试分层
 
 - `star-{symmetry,judge,levels,progress,hint}.test.js`：node 环境纯逻辑，覆盖六类对称的群运算、判定口径、40 关数据、存档与提示选择。
+- `star-golden.test.js`：40 关目标集黄金快照（`tests/fixtures/level-targets.golden.json`），任何数据或对称实现改动导致目标点变化都会逐关报差异；确认无误后用 `npm run gen:golden` 更新。
+- `star-playthrough.test.js`：40 关全量通关演练——用真实 `useStar` 状态机把每关目标点逐颗落下再提交，断言 `pass` 且三星；另含落错点失败/清空重来、提示点必属目标集。
 - `star-wiring.test.js`：扫所有 `.vue`，模板里每个 `@tap/@change/...` 的处理函数都必须在 `<script setup>` 里真的有定义（防止「按钮写着 handler、脚本没写」这类断线）。
 - `star-components.test.js` / `star-game-page.test.js`：jsdom 环境挂载组件与完整 game 页，真触发落点、方向盘、撤销、清空、提交、通关、存档。
   - 组件测试用 `// @vitest-environment jsdom` 单文件切换环境。
@@ -54,7 +58,7 @@ scripts/
 server/
   index.js         # 静态托管 + /api/health + ws health 路由
   port.js          # PORT > config.json > 3001
-tests/             # 10 个测试文件：核心逻辑 / 关卡数据 / 组件挂载 / 页面接线
+tests/             # 11 个测试文件：核心逻辑 / 关卡数据 / 目标集快照 / 40 关演练 / 组件 / 页面接线
 docs/星轨对位/      # 需求文档、技术方案、关卡数据
 ```
 
