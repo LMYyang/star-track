@@ -1,0 +1,25 @@
+{
+  "pages": [
+    {
+      "path": "pages/star/index",
+      "style": { "navigationBarTitleText": "星轨对位", "navigationStyle": "custom" }
+    },
+    {
+      "path": "pages/star/levels",
+      "style": { "navigationBarTitleText": "星图册", "navigationStyle": "custom" }
+    },
+    {
+      "path": "pages/star/game",
+      "style": { "navigationBarTitleText": "星轨对位", "navigationStyle": "custom", "disableScroll": true }
+    },
+    {
+      "path": "pages/star/help",
+      "style": { "navigationBarTitleText": "规则", "navigationStyle": "custom" }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarBackgroundColor": "#070a14",
+    "backgroundColor": "#070a14"
+  }
+}
