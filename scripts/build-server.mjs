@@ -1,7 +1,7 @@
 // 打包联网对战服务器为单文件 bundle：部署只需 dist/ + server/ 两个目录（不需要 src/）。
 // 产物 server/server.bundle.mjs（ESM，Node 20+）：游戏核心（src/core）与全部 npm 依赖
 // （含 ws）全部内联，自包含零依赖，服务器无需 npm install。
-// 启动：node server/server.bundle.mjs（端口：PORT 环境变量 > config.json > 3001）
+// 启动：node server/server.bundle.mjs（端口：PORT 环境变量 > config.json > 3005）
 import { build } from 'esbuild'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'

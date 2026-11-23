@@ -1,12 +1,12 @@
 // 端口统一读取：根目录 config.json 的 wsPort 是唯一配置源（前端 dev/build 与 ws 服务器共用）。
 // server 侧（node）：sync 读；PORT 环境变量优先（部署临时改端口无需动文件）。
-// 优先级：PORT 环境变量 > config.json > 3001（配置文件缺失/损坏时兜底）。
+// 优先级：PORT 环境变量 > config.json > 3005（配置文件缺失/损坏时兜底）。
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const DEFAULT_PORT = 3001
+const DEFAULT_PORT = 3005
 
 function readConfigFile() {
   try {
@@ -20,7 +20,7 @@ function readConfigFile() {
   return DEFAULT_PORT
 }
 
-/** ws 服务器启动端口：PORT 环境变量 > config.json > 3001 */
+/** ws 服务器启动端口：PORT 环境变量 > config.json > 3005 */
 export function readPort() {
   const env = Number(process.env.PORT)
   if (Number.isInteger(env) && env > 0 && env < 65536) return env

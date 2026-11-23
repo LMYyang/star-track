@@ -2,7 +2,7 @@
 
 对称空间闯关解谜：给出对称轴与轴一侧已摆好的星点，在另一侧补点，让整体满足指定对称关系。单人、每关 3–6 分钟、7 章 40 关。
 
-工程骨架沿用 `D:\demo\top-cow-card-game`（顶牛子）的开发框架：
+工程骨架沿用 `D:\demo\game-hub\top-cow-card-game`（顶牛子）的开发框架：
 
 - uni-app + Vue3 页面与构建（`npm run dev:h5` / `build:h5`）
 - 纯 JS 核心逻辑 + Vitest（`vitest.config.js` 不加载 uni 插件，node 环境跑核心测试）
@@ -57,7 +57,7 @@ scripts/
   build-server.mjs
 server/
   index.js         # 静态托管 + /api/health + ws health 路由
-  port.js          # PORT > config.json > 3001
+  port.js          # PORT > config.json > 3005
 tests/             # 11 个测试文件：核心逻辑 / 关卡数据 / 目标集快照 / 40 关演练 / 组件 / 页面接线
 docs/星轨对位/      # 需求文档、技术方案、关卡数据
 ```
