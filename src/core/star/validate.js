@@ -1,7 +1,7 @@
 // 关卡数据校验（CI / 编辑器保存后都跑）：返回错误清单，不抛异常。
 // 规则来自需求文档 §6.4「关卡数据硬约束」。
 import { hydrateLevel, CHAPTERS } from './levels.js'
-import { DIR_KEYS } from './symmetry.js'
+import { DIR_KEYS, groupOrder } from './symmetry.js'
 
 const VALID_BOARDS = [5, 7, 9]
 
@@ -50,13 +50,17 @@ export function validateAll(data) {
         errors.push(`${tag}: 残星只允许出现在第六章及以后`)
       }
       if ((raw.strays || []).length > 3) errors.push(`${tag}: 残星最多 3 个`)
+      if ((raw.blocked || []).length > 0 && raw.chapter < 9) {
+        errors.push(`${tag}: 暗域只允许出现在第九章及以后`)
+      }
+      if ((raw.blocked || []).length > 6) errors.push(`${tag}: 暗域最多 6 格`)
 
       const level = hydrateLevel(raw)
-      const expect = level.sources.length * (level.sym.type === 'cross' ? 3 : 1)
+      const expect = level.sources.length * (groupOrder(level.sym) - 1)
       if (level.targetCount !== expect) {
         errors.push(`${tag}: 目标数 ${level.targetCount} ≠ 预期 ${expect}`)
       }
-      const cells = level.board * level.board - level.axisCells.size
+      const cells = level.board * level.board - level.axisCells.size - level.blockedCells.size
       if (level.sources.length + level.targetCount > cells) {
         errors.push(`${tag}: 源点+目标超出可用格点`)
       }

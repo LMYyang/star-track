@@ -1,5 +1,5 @@
 // 关卡数据入口：唯一 import JSON 的地方（其余模块保持纯 JS，node 脚本可直接用）
-import raw from '../../data/levels.v1.json'
+import raw from '../../data/levels.v2.json'
 import { hydrateLevels } from './levels.js'
 
 export const STAR = hydrateLevels(raw)

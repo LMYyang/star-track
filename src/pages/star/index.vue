@@ -34,12 +34,12 @@
 
     <view class="progress-card">
       <view class="pc-item">
-        <text class="pc-num">{{ progress.cleared }}<text class="pc-total">/40</text></text>
+        <text class="pc-num">{{ progress.cleared }}<text class="pc-total">/{{ LEVEL_COUNT }}</text></text>
         <text class="pc-label">已通关</text>
       </view>
       <view class="pc-divider" />
       <view class="pc-item">
-        <text class="pc-num gold">{{ progress.totalStars }}<text class="pc-total">/120</text></text>
+        <text class="pc-num gold">{{ progress.totalStars }}<text class="pc-total">/{{ LEVEL_COUNT * 3 }}</text></text>
         <text class="pc-label">累计星数</text>
       </view>
       <view class="pc-divider" />
@@ -51,7 +51,7 @@
 
     <view class="footer">
       <text class="mute" @tap="toggleMute">{{ muted ? '🔇 静音中' : '🔊 音效开' }}</text>
-      <text class="ver">v0.1 · 40 关</text>
+      <text class="ver">v1.1 · {{ LEVEL_COUNT }} 关</text>
     </view>
   </view>
 </template>
@@ -60,7 +60,7 @@
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { loadProgress, emptyProgress, isUnlocked } from '../../core/star/progress.js'
-import { LEVELS } from '../../core/star/levelData.js'
+import { LEVELS, LEVEL_COUNT } from '../../core/star/levelData.js'
 import { useSound } from '../../composables/useSound.js'
 
 const progress = ref(emptyProgress())

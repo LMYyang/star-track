@@ -38,6 +38,7 @@ export function useStar(level) {
   const placedCount = computed(() => state.placed.length)
   const targetCount = level.targetCount
   const isArrowLevel = !!level.arrows
+  const blockedCells = level.blockedCells || new Set()
 
   /** 找该坐标上已有的玩家点 */
   function indexAt(x, y) {
@@ -47,6 +48,7 @@ export function useStar(level) {
   /** 点击格点：有则移除，无则落点（箭头关带当前方向） */
   function tap({ x, y }, dirOverride) {
     if (state.phase !== 'PLAYING') return { ok: false, reason: 'LOCKED' }
+    if (blockedCells.has(`${x},${y}`)) return { ok: false, reason: 'BLOCKED' }
     const i = indexAt(x, y)
     if (i >= 0) {
       state.placed.splice(i, 1)

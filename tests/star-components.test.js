@@ -111,8 +111,7 @@ describe('StarBoard', () => {
     expect(arrows[1].attributes('style')).toContain('rotate(180deg)')
   })
 
-  it('残星与源星形状可区分（空心环 vs 实心四芒）', () => {
-    const level = { ...LEVEL_V, strays: [[1, 3]] }
+  it('残星与源星形状可区分（空心环 vs 实心四芒）', () => {    const level = { ...LEVEL_V, strays: [[1, 3]] }
     const w = mount(StarBoard, { props: { level, size: SIZE } })
     expect(w.findAll('.stray').length).toBe(1)
     expect(w.findAll('.stray-core').length).toBe(1)
@@ -137,5 +136,22 @@ describe('StarBoard', () => {
     await tapAt(w, 20 + pad2 + 4 * step2, 10 + pad2 + 4 * step2)
     // 第二次点击也必须命中，而不是因为 rect 过期落到界外
     expect(w.emitted('point').at(-1)).toEqual([{ x: 4, y: 4 }])
+  })
+
+  it('暗域格渲染为暗斑，点击 emit reject(BLOCKED)', async () => {
+    const level = { ...LEVEL_V, blockedList: [[1, 3]], blockedCells: new Set(['1,3']) }
+    const w = mount(StarBoard, { props: { level, size: SIZE } })
+    expect(w.findAll('.blocked-cell').length).toBe(1)
+    const [x, y] = cellPx(1, 3)
+    await tapAt(w, x, y)
+    expect(w.emitted('reject')).toEqual([[{ x: 1, y: 3, reason: 'BLOCKED' }]])
+    expect(w.emitted('point')).toBeUndefined()
+  })
+
+  it('旋转关画中心环、不画对称轴', () => {
+    const level = { ...LEVEL_V, sym: { type: 'r', hx: 4, hy: 4 }, axisCells: new Set(['2,2']) }
+    const w = mount(StarBoard, { props: { level, size: SIZE } })
+    expect(w.findAll('.axis-ray').length).toBe(0)
+    expect(w.findAll('.rot-ring').length).toBe(1)
   })
 })

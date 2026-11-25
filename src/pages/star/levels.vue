@@ -4,7 +4,7 @@
       <view class="icon-btn" @tap="back"><text class="icon">‹</text></view>
       <view class="nav-title">
         <text class="t">星图册</text>
-        <text class="s">{{ progress.cleared }} / 40 关通关 · {{ progress.totalStars }} ★</text>
+        <text class="s">{{ progress.cleared }} / {{ LEVEL_COUNT }} 关通关 · {{ progress.totalStars }} ★</text>
       </view>
       <view class="nav-right" />
     </view>
@@ -35,8 +35,7 @@
               <text v-for="i in 3" :key="i" :class="{ lit: i <= starsOf(l.id) }">★</text>
             </view>
             <text v-if="!unlockedOf(l.id)" class="lock">锁</text>
-            <text v-else-if="l.arrows" class="tag-arrow">矢</text>
-            <text v-else-if="l.strays.length" class="tag-stray">残</text>
+            <text v-else-if="tagOf(l)" class="cell-tag" :class="'tag-' + tagClassOf(l)">{{ tagOf(l) }}</text>
           </view>
         </view>
       </view>
@@ -49,7 +48,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { CHAPTERS } from '../../core/star/levelData.js'
+import { CHAPTERS, LEVEL_COUNT } from '../../core/star/levelData.js'
 import { loadProgress, emptyProgress, isUnlocked, starOf, chapterStars } from '../../core/star/progress.js'
 
 const progress = ref(emptyProgress())
@@ -58,10 +57,28 @@ onShow(() => {
 })
 
 const chapters = CHAPTERS
-const nextId = computed(() => Math.min(progress.value.cleared + 1, 40))
+const nextId = computed(() => Math.min(progress.value.cleared + 1, LEVEL_COUNT))
 const unlockedOf = (id) => isUnlocked(progress.value, id)
 const starsOf = (id) => starOf(progress.value, id)
 const chapterStarsOf = (c) => chapterStars(progress.value, c.levels)
+
+/** 关卡角标：矢=箭头 残=残星 障=暗域 旋=旋转 综=多机制叠加 */
+function tagOf(l) {
+  if (l.arrows) return '矢'
+  if (l.strays.length && l.blockedList.length) return '综'
+  if (l.blockedList.length) return '障'
+  if (l.strays.length) return '残'
+  if (l.sym.type === 'r') return '旋'
+  return ''
+}
+function tagClassOf(l) {
+  if (l.arrows) return 'arrow'
+  if (l.strays.length && l.blockedList.length) return 'mix'
+  if (l.blockedList.length) return 'block'
+  if (l.strays.length) return 'stray'
+  if (l.sym.type === 'r') return 'rot'
+  return ''
+}
 
 function enter(l) {
   if (!isUnlocked(progress.value, l.id)) {
@@ -149,7 +166,7 @@ function back() {
 .cell-stars { display: flex; gap: 2rpx; margin-top: 2rpx; }
 .cell-stars text { font-size: 16rpx; color: #313a56; }
 .cell-stars text.lit { color: #e3c07a; }
-.lock, .tag-arrow, .tag-stray {
+.lock, .cell-tag {
   position: absolute;
   right: 6rpx;
   top: 6rpx;
@@ -161,5 +178,8 @@ function back() {
 }
 .tag-arrow { color: #a9c4ff; }
 .tag-stray { color: #8c9ec4; }
+.tag-block { color: #b48ce0; }
+.tag-rot { color: #e3c07a; }
+.tag-mix { color: #7fe0c8; }
 .bottom-space { height: calc(env(safe-area-inset-bottom) + 40rpx); }
 </style>

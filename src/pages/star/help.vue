@@ -20,7 +20,7 @@
     </view>
 
     <view class="card">
-      <text class="h">六种对称关系</text>
+      <text class="h">七种对称关系</text>
       <view v-for="it in SYMS" :key="it.name" class="sym-row">
         <text class="sym-name">{{ it.name }}</text>
         <text class="sym-formula">{{ it.formula }}</text>
@@ -44,8 +44,20 @@
     </view>
 
     <view class="card">
-      <text class="h">箭头星（第七章）</text>
-      <text class="p">星点上带箭头，位置对齐还不够，方向也要跟着翻折：竖轴「右→左」，横轴「上→下」，斜轴会互换上下左右。</text>
+      <text class="h">旋转对称（第八章起）</text>
+      <text class="p">金色虚线圆环是旋转中心：整张星图绕它顺时针转 90° 后要跟原来一模一样。一个源点会转出三颗，分别在右、下、左，四颗连起来是一个方环。</text>
+      <text class="p dim">中心落在格点上时，那一格是死点，不能落星；中心落在格心时没有死点。</text>
+    </view>
+
+    <view class="card">
+      <text class="h">暗域（第九章起）</text>
+      <text class="p">带虚线边框的暗斑是暗域：那里落不下星，点上去会被弹回。暗域永远不参与判定，只负责挡路——把它当成星图上的缺口，绕开数格子。</text>
+      <text class="p dim">暗域更密时，先补离中心最近的星，能少走弯路。</text>
+    </view>
+
+    <view class="card">
+      <text class="h">箭头星（第七章起）</text>
+      <text class="p">星点上带箭头，位置对齐还不够，方向也要跟着翻折：竖轴「右→左」，横轴「上→下」，斜轴会互换上下左右，旋转关则整体转 90°。</text>
       <text class="p dim">先选方向，再落点；落点会自动带上当前方向。</text>
     </view>
 
@@ -54,6 +66,7 @@
       <text class="p">· 从最靠近轴的星开始补，误差最小。</text>
       <text class="p">· 斜轴先把「左右」和「上下」的对应关系在心里过一次。</text>
       <text class="p">· 双轴关按象限成组补，一个源点要补三点，别漏。</text>
+      <text class="p">· 旋转关按「右、下、左」三个方向依次数格，比一次想完四个点稳。</text>
     </view>
 
     <view class="bottom-space" />
@@ -68,6 +81,7 @@ const SYMS = [
   { name: '斜轴 ╲', formula: '(x, y) → (c − y, c − x)', tip: '互换并反向' },
   { name: '中心', formula: '(x, y) → (2cx − x, 2cy − y)', tip: '左右上下同时反' },
   { name: '双轴', formula: '竖 + 横的四像', tip: '一个点补三点' },
+  { name: '旋转', formula: '(x, y) → (cx − (y − cy), cy + (x − cx))', tip: '绕中心顺时针 90°' },
 ]
 
 function back() {

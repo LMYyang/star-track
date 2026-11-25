@@ -117,6 +117,7 @@ const symText = computed(() => {
   if (s.type === 'h') return `横轴 y=${s.hy / 2}`
   if (s.type === 'p') return `中心 (${s.hx / 2}, ${s.hy / 2})`
   if (s.type === 'cross') return `十字 (${s.hx / 2}, ${s.hy / 2})`
+  if (s.type === 'r') return `旋转 90° (${s.hx / 2}, ${s.hy / 2})`
   if (s.type === 'd1') return `斜轴 y = x + ${s.c}`
   return `斜轴 x + y = ${s.c}`
 })
@@ -176,8 +177,9 @@ function undo() {
 function clear() {
   session.value.clear()
 }
-function onReject() {
-  flash('轴上的格点不能落星')
+function onReject(e) {
+  const reason = typeof e === 'string' ? e : e && e.reason
+  flash(reason === 'BLOCKED' ? '暗域里落不下星' : '轴上的格点不能落星')
 }
 function onSubmit() {
   if (state.value.phase !== 'PLAYING') return
@@ -265,6 +267,30 @@ const GUIDE_TEXT = {
       '箭头星的镜像不只是位置，箭头方向也要跟着翻。',
       '先在下方选择方向，再点格点落星。',
       '斜轴上「上」会变成「左」，这是最容易翻错的地方。',
+    ],
+  },
+  41: {
+    title: '这次是「转」不是「翻」',
+    lines: [
+      '金色虚线圆环是旋转中心：整张星图绕它顺时针转 90° 后必须和原来一样。',
+      '一颗星会绕着中心转出三颗，分别落在右、下、左三个方向，连起来正好一个方环。',
+      '中心落在格点上时那一格是死点，不能落星；落在格心时没有死点。',
+    ],
+  },
+  48: {
+    title: '暗斑不能落星',
+    lines: [
+      '带虚线边框的暗斑是暗域：那里落不下星，点上去只会被弹回。',
+      '暗域永远不是答案的一部分，它只负责挡住路，让你绕开它数格子。',
+      '把暗域当成星图上的缺口，先把明处的镜像补齐。',
+    ],
+  },
+  56: {
+    title: '旋转 + 方向',
+    lines: [
+      '箭头星在旋转关里，方向会跟着一起转 90°：上→右→下→左。',
+      '一颗源星的三个像，方向各不相同，不能只按一个方向补。',
+      '先在下方选定方向，再落点，逐颗核对。',
     ],
   },
 }

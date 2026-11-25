@@ -93,6 +93,51 @@ describe('symmetry / 翻折的数学性质', () => {
   })
 })
 
+describe('symmetry / 四重旋转 r', () => {
+  const sym = normalizeSym({ type: 'r', cx: 3, cy: 3 })
+
+  it('中心必须落在格点或格心', () => {
+    expect(() => normalizeSym({ type: 'r', cx: 2.5, cy: 3 })).toThrow('旋转中心')
+    expect(normalizeSym({ type: 'r', cx: 2.5, cy: 2.5 }).hx).toBe(5)
+  })
+
+  it('群阶 4，转四次回原位且每步都是整数格点', () => {
+    expect(groupOf(sym)).toHaveLength(4)
+    for (let x = 0; x < 9; x++) {
+      for (let y = 0; y < 9; y++) {
+        const orbit = groupImages(sym, [x, y])
+        expect(orbit).toHaveLength(4)
+        for (const q of orbit) expect(Number.isInteger(q[0]) && Number.isInteger(q[1])).toBe(true)
+        expect(applyMat(groupOf(sym)[1], orbit[1])).toEqual(orbit[2])
+        expect(applyMat(groupOf(sym)[1], orbit[2])).toEqual(orbit[3])
+        expect(applyMat(groupOf(sym)[1], orbit[3])).toEqual(orbit[0])
+      }
+    }
+  })
+
+  it('顺时针 90°：(1, 0) 绕 (3,3) 转到 (6, 1)', () => {
+    expect(imageOf(sym, [1, 0])).toEqual([6, 1])
+    expect(applyMat(groupOf(sym)[2], [1, 0])).toEqual([5, 6])
+    expect(applyMat(groupOf(sym)[3], [1, 0])).toEqual([0, 5])
+  })
+
+  it('绕格心（2.5, 2.5）旋转仍是格点', () => {
+    const cellSym = normalizeSym({ type: 'r', cx: 2.5, cy: 2.5 })
+    expect(imageOf(cellSym, [0, 0])).toEqual([5, 0])
+  })
+
+  it('中心格是死点；格心中心没有死点', () => {
+    expect([...axisCells(sym, 7)]).toEqual(['3,3'])
+    expect(axisCells(normalizeSym({ type: 'r', cx: 2.5, cy: 2.5 }), 7).size).toBe(0)
+  })
+
+  it('方向整体转 90°：U→R→D→L', () => {
+    expect(directionTable(sym, 1)).toEqual(['R', 'D', 'L', 'U'])
+    expect(directionTable(sym, 2)).toEqual(['D', 'L', 'U', 'R'])
+    expect(directionTable(sym, 3)).toEqual(['L', 'U', 'R', 'D'])
+  })
+})
+
 describe('symmetry / 轴格', () => {
   it('竖轴整格：5×5 共 5 个轴格', () => {
     expect(axisCells(normalizeSym({ type: 'v', axis: 2 }), 5).size).toBe(5)

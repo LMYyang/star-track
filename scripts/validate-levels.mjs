@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { validateAll } from '../src/core/star/validate.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const FILE = process.argv[2] || path.join(ROOT, 'src', 'data', 'levels.v1.json')
+const FILE = process.argv[2] || path.join(ROOT, 'src', 'data', 'levels.v2.json')
 
 const data = JSON.parse(fs.readFileSync(FILE, 'utf8'))
 const { ok, errors, levels } = validateAll(data)
@@ -23,11 +23,12 @@ const symLabel = (l) => {
   if (s.type === 'h') return `h@${s.hy / 2}`
   if (s.type === 'p') return `p(${s.hx / 2},${s.hy / 2})`
   if (s.type === 'cross') return `cross(${s.hx / 2},${s.hy / 2})`
+  if (s.type === 'r') return `rot(${s.hx / 2},${s.hy / 2})`
   return `${s.type} c=${s.c}`
 }
 
 console.log(`✓ 关卡数据校验通过：${levels.length} 关，文件 ${path.basename(FILE)}（${fs.statSync(FILE).size} bytes）\n`)
-console.log('  id  名称      章  板  对称          源  残星  需补  提交  提示  偏差量')
+console.log('  id  名称      章  板  对称          源  残星  暗域  需补  提交  提示  偏差量')
 for (const l of levels) {
   console.log(
     [
@@ -38,6 +39,7 @@ for (const l of levels) {
       symLabel(l).padEnd(13),
       String(l.sources.length).padStart(3),
       String(l.strays.length).padStart(4),
+      String(l.blockedList.length).padStart(4),
       String(l.targetCount).padStart(5),
       String(l.moves).padStart(4),
       String(l.hints).padStart(4),

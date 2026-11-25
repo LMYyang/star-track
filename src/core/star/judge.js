@@ -4,6 +4,8 @@ export function deriveTargets(level, sym) {
   const map = new Map()
   const n = level.board
   const axis = level.axisCells
+  const blocked = level.blockedCells || new Set()
+  const sourceXY = new Set((level.sources || []).map((s) => `${s[0]},${s[1]}`))
   for (const s of level.sources) {
     for (const m of groupOf(sym)) {
       const q = applyMat(m, s)
@@ -13,6 +15,12 @@ export function deriveTargets(level, sym) {
       }
       if (axis.has(keyOf(q))) {
         throw new Error(`关卡 ${level.id}: 源点 ${keyOf(s)} 的像落在轴格 ${keyOf(q)}`)
+      }
+      if (blocked.has(keyOf(q))) {
+        throw new Error(`关卡 ${level.id}: 源点 ${keyOf(s)} 的像落在暗域 ${keyOf(q)}`)
+      }
+      if (sourceXY.has(`${q[0]},${q[1]}`)) {
+        throw new Error(`关卡 ${level.id}: 源点 ${keyOf(s)} 的像与源点重合 ${keyOf(q)}`)
       }
       const p = level.arrows ? [q[0], q[1], applyDir(m, s[2])] : [q[0], q[1]]
       const k = keyOf(p)

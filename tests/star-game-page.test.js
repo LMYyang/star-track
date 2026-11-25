@@ -107,6 +107,13 @@ describe('game 页事件接线', () => {
     expect(w.text()).toContain('至少先补一颗星')
   })
 
+  it('点暗域格给出「暗域」提示', async () => {
+    const w = await mountGame(48)
+    w.findComponent(StarBoard).vm.$emit('reject', { x: 1, y: 3, reason: 'BLOCKED' })
+    await nextTick()
+    expect(w.text()).toContain('暗域里落不下星')
+  })
+
   it('补齐四点提交 → 通关弹层与三星', async () => {
     const w = await mountGame(37)
     const board = w.findComponent(StarBoard)

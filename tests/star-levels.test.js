@@ -1,18 +1,20 @@
 import { describe, it, expect } from 'vitest'
 import { validateAll } from '../src/core/star/validate.js'
 import { hydrateLevels, rateStar, CHAPTERS } from '../src/core/star/levels.js'
+import { groupOrder } from '../src/core/star/symmetry.js'
+import { LEVELS } from '../src/core/star/levelData.js'
 import { RAW } from './helpers.js'
 
 const STAR = hydrateLevels(RAW)
 
 describe('levels / 数据完整性', () => {
-  it('40 关全部通过校验', () => {
+  it('全部关卡通过校验', () => {
     expect(validateAll(RAW)).toMatchObject({ ok: true, errors: [] })
   })
 
-  it('id 从 1 连续到 40，章节 1~7 递增', () => {
+  it('id 从 1 连续到 N，章节递增', () => {
     expect(STAR.levels.map((l) => l.id)).toEqual(
-      Array.from({ length: 40 }, (_, i) => i + 1)
+      Array.from({ length: STAR.levels.length }, (_, i) => i + 1)
     )
     let prev = 0
     for (const l of STAR.levels) {
@@ -21,11 +23,11 @@ describe('levels / 数据完整性', () => {
     }
   })
 
-  it('七章分组，每章非空', () => {
-    expect(CHAPTERS).toHaveLength(7)
-    expect(STAR.chapters).toHaveLength(7)
+  it('十章分组，每章非空', () => {
+    expect(CHAPTERS).toHaveLength(10)
+    expect(STAR.chapters).toHaveLength(10)
     for (const c of STAR.chapters) expect(c.levels.length).toBeGreaterThan(0)
-    expect(STAR.chapters.map((c) => c.levels.length).reduce((a, b) => a + b, 0)).toBe(40)
+    expect(STAR.chapters.map((c) => c.levels.length).reduce((a, b) => a + b, 0)).toBe(STAR.levels.length)
   })
 
   it('板面只用 5/7/9，源点 2~8 个', () => {
@@ -41,24 +43,75 @@ describe('levels / 数据完整性', () => {
     expect(STAR.levels.at(-1).moves).toBe(3)
   })
 
-  it('残星只出现在第六章', () => {
+  it('残星只出现在第六章及以后', () => {
     const strayLevels = STAR.levels.filter((l) => l.strays.length > 0)
     expect(strayLevels.length).toBeGreaterThanOrEqual(3)
-    expect(strayLevels.every((l) => l.chapter === 6)).toBe(true)
+    expect(strayLevels.every((l) => l.chapter >= 6)).toBe(true)
   })
 
-  it('箭头关只出现在第七章', () => {
+  it('箭头关只出现在第七章及以后', () => {
     const arrowLevels = STAR.levels.filter((l) => l.arrows)
     expect(arrowLevels.length).toBeGreaterThanOrEqual(3)
-    expect(arrowLevels.every((l) => l.chapter === 7)).toBe(true)
+    expect(arrowLevels.every((l) => l.chapter >= 7)).toBe(true)
+  })
+
+  it('旋转关只在第八章及以后，且群阶为 4', () => {
+    const rot = STAR.levels.filter((l) => l.sym.type === 'r')
+    expect(rot.length).toBeGreaterThanOrEqual(5)
+    expect(rot.every((l) => l.chapter >= 8)).toBe(true)
+    for (const l of rot) expect(groupOrder(l.sym)).toBe(4)
+  })
+
+  it('暗域只在第九章及以后，且不压源点/目标/残星/轴格', () => {
+    const blockedLevels = STAR.levels.filter((l) => l.blockedList.length > 0)
+    expect(blockedLevels.length).toBeGreaterThanOrEqual(6)
+    for (const l of blockedLevels) {
+      expect(l.chapter).toBeGreaterThanOrEqual(9)
+      expect(l.blockedList.length).toBeLessThanOrEqual(6)
+      const srcXY = new Set(l.sources.map((s) => `${s[0]},${s[1]}`))
+      for (const b of l.blockedList) {
+        const k = `${b[0]},${b[1]}`
+        expect(srcXY.has(k)).toBe(false)
+        expect(l.targets.has(k)).toBe(false)
+        expect(l.axisCells.has(k)).toBe(false)
+        expect(l.strays.some((s) => `${s[0]},${s[1]}` === k)).toBe(false)
+      }
+    }
   })
 
   it('每关目标数 = 源点数 ×（群阶-1），且目标互不重复', () => {
     for (const l of STAR.levels) {
-      const order = l.sym.type === 'cross' ? 4 : 2
+      const order = groupOrder(l.sym)
       expect(l.targetCount).toBe(l.sources.length * (order - 1))
       expect(l.targets.size).toBe(l.targetCount)
     }
+  })
+
+  it('箭头关：同一格点不会要求两个方向', () => {
+    for (const l of STAR.levels.filter((x) => x.arrows)) {
+      const pos = new Set()
+      for (const { p } of l.targets.values()) {
+        const k = `${p[0]},${p[1]}`
+        expect(pos.has(k), `第 ${l.id} 关 ${k} 重复`).toBe(false)
+        pos.add(k)
+      }
+    }
+  })
+})
+
+describe('levels / 新章节结构', () => {
+  it('总关卡数与数据入口一致', () => {
+    expect(STAR.levels.length).toBe(LEVELS.length)
+    expect(LEVELS.length).toBe(64)
+  })
+
+  it('第 8/9/10 章关卡数分别为 7/8/9', () => {
+    expect(STAR.byId.get(41).chapter).toBe(8)
+    expect(STAR.byId.get(48).chapter).toBe(9)
+    expect(STAR.byId.get(56).chapter).toBe(10)
+    expect(STAR.chapters.find((c) => c.no === 8).levels.length).toBe(7)
+    expect(STAR.chapters.find((c) => c.no === 9).levels.length).toBe(8)
+    expect(STAR.chapters.find((c) => c.no === 10).levels.length).toBe(9)
   })
 })
 
@@ -88,6 +141,33 @@ describe('levels / 基准关（文档演算结果）', () => {
     expect(coords.size).toBe(4)
     expect(l.targetCount).toBe(9)
   })
+
+  it('L41 四重旋转：一个点转出右、下、左三颗', () =>
+    expect(keys(41)).toEqual(['0,3', '1,4', '3,0', '3,4', '4,1', '4,3']))
+
+  it('L44 绕格心旋转：没有轴格，四角成环', () => {
+    const l = STAR.byId.get(44)
+    expect(l.axisCells.size).toBe(0)
+    const first = l.sources[0] // [0,0]
+    const got = [...l.targets.values()].filter((e) => e.src === first).map((e) => e.p.join(','))
+    expect(got.sort()).toEqual(['0,5', '5,0', '5,5'])
+  })
+
+  it('L48 暗域关：目标是镜像点，暗域格不在答案里', () => {
+    expect(keys(48)).toEqual(['4,0', '4,5', '6,0', '6,2'])
+    for (const b of STAR.byId.get(48).blockedList) {
+      expect(STAR.byId.get(48).targets.has(`${b[0]},${b[1]}`)).toBe(false)
+    }
+  })
+
+  it('L55 旋转 + 暗域：暗域压在四条中心线上', () => {
+    const l = STAR.byId.get(55)
+    expect(l.targetCount).toBe(9)
+    expect([...l.blockedList.map((b) => b.join(','))].sort()).toEqual(['0,4', '4,0', '4,8', '8,4'])
+  })
+
+  it('L56 旋转 + 箭头：方向随群元素一起转 90°', () =>
+    expect(keys(56)).toEqual(['0,4,L', '1,5,U', '4,6,D', '5,1,D', '5,5,L', '6,2,R']))
 })
 
 describe('levels / 星级规则', () => {

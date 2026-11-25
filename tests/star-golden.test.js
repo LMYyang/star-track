@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import raw from '../src/data/levels.v1.json'
+import raw from '../src/data/levels.v2.json'
 import { hydrateLevels } from '../src/core/star/levels.js'
 import golden from './fixtures/level-targets.golden.json'
 
@@ -9,10 +9,10 @@ import golden from './fixtures/level-targets.golden.json'
 
 const { levels } = hydrateLevels(raw)
 
-describe('40 关目标集黄金快照', () => {
+describe('全量目标集黄金快照', () => {
   it('关卡数量与快照一致', () => {
     expect(levels.length).toBe(golden.count)
-    expect(golden.count).toBe(40)
+    expect(golden.count).toBe(64)
   })
 
   it.each(golden.levels.map((g) => [g.id, g]))('第 %i 关目标集不变', (id, g) => {

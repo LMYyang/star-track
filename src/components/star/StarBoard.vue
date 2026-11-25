@@ -18,6 +18,23 @@
         :style="rayStyle(r)"
       />
 
+      <!-- 旋转中心：虚线圆环 + 缓慢自转，提示「这里是转不是翻」 -->
+      <view v-if="rotRing" class="rot-ring" :style="rotRing">
+        <view class="rot-tick t1" />
+        <view class="rot-tick t2" />
+        <view class="rot-tick t3" />
+      </view>
+
+      <!-- 暗域：落不下星的暗斑格 -->
+      <view
+        v-for="(b, i) in blocked"
+        :key="'b' + i"
+        class="blocked-cell"
+        :style="blockedStyle(b)"
+      >
+        <view class="blocked-core" />
+      </view>
+
       <!-- 残星（干扰点，永不参与对称） -->
       <view
         v-for="(s, i) in strays"
@@ -104,6 +121,20 @@ const dots = computed(() => {
 
 const sources = computed(() => props.level.sources)
 const strays = computed(() => props.level.strays)
+const blocked = computed(() => props.level.blockedList || [])
+
+/** 旋转中心环（仅 r 类型） */
+const rotRing = computed(() => {
+  const s = props.level.sym
+  if (!s || s.type !== 'r') return null
+  const d = step.value * 1.15
+  return {
+    left: px(s.hx / 2) + 'px',
+    top: px(s.hy / 2) + 'px',
+    width: d + 'px',
+    height: d + 'px',
+  }
+})
 
 /** 对称轴线段（像素坐标），支持竖/横/两条斜轴/中心点 */
 const rays = computed(() => {
@@ -112,6 +143,7 @@ const rays = computed(() => {
   const S = step.value
   const N = n.value
   const seg = (x1, y1, x2, y2) => ({ x1, y1, x2, y2 })
+  if (s.type === 'r') return [] // 旋转没有轴，只画中心环
   if (s.type === 'v') return [seg(px(s.hx / 2), 0, px(s.hx / 2), props.size)]
   if (s.type === 'h') return [seg(0, px(s.hy / 2), props.size, px(s.hy / 2))]
   if (s.type === 'cross') {
@@ -156,6 +188,16 @@ function rayStyle(r) {
 
 function starStyle(p) {
   return { left: px(p[0]) + 'px', top: px(p[1]) + 'px' }
+}
+
+function blockedStyle(p) {
+  const d = step.value * 0.92
+  return {
+    left: px(p[0]) + 'px',
+    top: px(p[1]) + 'px',
+    width: d + 'px',
+    height: d + 'px',
+  }
 }
 
 const DIR_ANGLE = { U: 0, R: 90, D: 180, L: 270 }
@@ -217,6 +259,10 @@ function handle({ cx, cy }) {
   if (dist > 0.6) return // 离最近格点太远：忽略，避免误落
   if (props.level.axisCells.has(`${x},${y}`)) {
     emit('reject', { x, y, reason: 'AXIS_CELL' })
+    return
+  }
+  if (props.level.blockedCells && props.level.blockedCells.has(`${x},${y}`)) {
+    emit('reject', { x, y, reason: 'BLOCKED' })
     return
   }
   emit('point', { x, y })
@@ -349,7 +395,7 @@ function handle({ cx, cy }) {
   filter: drop-shadow(0 0 10rpx rgba(127, 166, 242, 0.8));
 }
 
-/* 残星：空心细环 + 灰蓝 + 缓慢漂移，形状与真源星不同 */
+/* 残星：实线冷青细环（与暗域的紫色虚线暗斑区分开）+ 缓慢漂移 */
 .stray {
   position: absolute;
   width: 34rpx;
@@ -357,26 +403,75 @@ function handle({ cx, cy }) {
   margin-left: -17rpx;
   margin-top: -17rpx;
   border-radius: 50%;
-  border: 3rpx dashed rgba(152, 170, 208, 0.82);
+  border: 3rpx solid rgba(139, 219, 224, 0.62);
   opacity: 0.95;
-  box-shadow: 0 0 14rpx rgba(120, 142, 184, 0.28);
+  box-shadow: 0 0 14rpx rgba(108, 196, 204, 0.3);
   animation: drift 5.5s ease-in-out infinite;
 }
 .stray-core {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 6rpx;
-  height: 6rpx;
-  margin-left: -3rpx;
-  margin-top: -3rpx;
+  width: 8rpx;
+  height: 8rpx;
+  margin-left: -4rpx;
+  margin-top: -4rpx;
   border-radius: 50%;
-  background: rgba(152, 170, 208, 0.62);
+  background: rgba(139, 219, 224, 0.5);
 }
 @keyframes drift {
   0% { transform: translate(0, 0); }
   50% { transform: translate(6rpx, -6rpx); }
   100% { transform: translate(0, 0); }
+}
+
+/* 旋转中心：虚线圆环 + 三枚曳光点缓慢自转 */
+.rot-ring {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2rpx dashed rgba(227, 192, 122, 0.62);
+  box-shadow: 0 0 18rpx rgba(227, 192, 122, 0.24), inset 0 0 14rpx rgba(227, 192, 122, 0.12);
+  pointer-events: none;
+  animation: spin 14s linear infinite;
+}
+.rot-tick {
+  position: absolute;
+  width: 7rpx;
+  height: 7rpx;
+  margin: -3.5rpx 0 0 -3.5rpx;
+  border-radius: 50%;
+  background: rgba(246, 220, 166, 0.85);
+  box-shadow: 0 0 10rpx rgba(246, 220, 166, 0.7);
+}
+.rot-tick.t1 { left: 50%; top: 0; }
+.rot-tick.t2 { left: 100%; top: 50%; }
+.rot-tick.t3 { left: 50%; top: 100%; }
+@keyframes spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 暗域格：吞光的暗斑 + 紫色虚线边框（虚线专属于暗域）+ 中间的暗核 */
+.blocked-cell {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 14rpx;
+  background: radial-gradient(circle at 50% 46%, rgba(4, 5, 10, 0.98), rgba(34, 20, 54, 0.86) 58%, rgba(58, 34, 82, 0.42));
+  border: 3rpx dashed rgba(138, 98, 184, 0.86);
+  box-shadow: inset 0 0 24rpx rgba(0, 0, 0, 0.92), 0 0 16rpx rgba(112, 70, 150, 0.34);
+  pointer-events: none;
+}
+.blocked-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10rpx;
+  height: 10rpx;
+  margin: -5rpx 0 0 -5rpx;
+  border-radius: 50%;
+  background: rgba(178, 132, 220, 0.46);
+  box-shadow: 0 0 12rpx rgba(150, 104, 196, 0.6);
 }
 
 /* 提示光环 */

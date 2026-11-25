@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { hydrateLevels } from '../src/core/star/levels.js'
 
-const SRC = new URL('../src/data/levels.v1.json', import.meta.url)
+const SRC = new URL('../src/data/levels.v2.json', import.meta.url)
 const OUT = new URL('../tests/fixtures/level-targets.golden.json', import.meta.url)
 
 const data = JSON.parse(readFileSync(SRC, 'utf8'))
