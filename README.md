@@ -2,7 +2,7 @@
 
 对称空间闯关解谜：给出对称轴与轴一侧已摆好的星点，在另一侧补点，让整体满足指定对称关系。单人、每关 3–6 分钟、7 章 40 关。
 
-工程骨架沿用 `D:\demo\game-hub\top-cow-card-game`（顶牛子）的开发框架：
+工程骨架沿用 game-hub 工作区内 `001_top-cow-card-game`（顶牛子）的开发框架：
 
 - uni-app + Vue3 页面与构建（`npm run dev:h5` / `build:h5`）
 - 纯 JS 核心逻辑 + Vitest（`vitest.config.js` 不加载 uni 插件，node 环境跑核心测试）
@@ -11,16 +11,17 @@
 
 ## 快速开始
 
+> 依赖集中在工作区根 `node_modules`，项目目录内无需 `npm install`。
+
 ```bash
-npm install
 npm run dev:h5        # 浏览器开发
-npm run test          # 219 个用例（核心逻辑 + 关卡数据 + 目标集快照 + 40 关演练 + 组件 + 页面接线）
+npm test              # 219 个用例（核心逻辑 + 关卡数据 + 目标集快照 + 40 关演练 + 组件 + 页面接线）
 npm run validate:levels   # 40 关数据体检表
 npm run verify        # CI 同款：关卡校验 + 全部测试 + H5 构建
 npm run gen:golden    # 关卡目标集快照更新（改了关卡数据后手动跑）
 npm run build:h5      # 产物 dist/build/h5
 npm run build:server  # 产物 server/server.bundle.mjs（自包含）
-node server/server.bundle.mjs   # 同端口托管 dist/build/h5
+node server/server.bundle.mjs   # 同端口托管 dist/build/h5，端口 3005
 ```
 
 ## 测试分层
@@ -54,11 +55,12 @@ src/
 scripts/
   validate-levels.mjs
   gen-sounds.mjs
+  gen-golden.mjs
   build-server.mjs
 server/
   index.js         # 静态托管 + /api/health + ws health 路由
   port.js          # PORT > config.json > 3005
-tests/             # 11 个测试文件：核心逻辑 / 关卡数据 / 目标集快照 / 40 关演练 / 组件 / 页面接线
+tests/             # 12 个测试文件：核心逻辑 / 关卡数据 / 目标集快照 / 40 关演练 / 组件 / 页面接线
 docs/星轨对位/      # 需求文档、技术方案、关卡数据
 ```
 
