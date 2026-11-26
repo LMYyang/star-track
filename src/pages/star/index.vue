@@ -23,9 +23,7 @@
     </view>
 
     <view class="menu">
-      <button class="btn-primary main" @tap="start">
-        {{ progress.cleared > 0 ? `继续 · 第 ${progress.cleared + 1} 关` : '开始观测' }}
-      </button>
+      <button class="btn-primary main" @tap="start">{{ startLabel }}</button>
       <view class="row">
         <view class="btn-secondary half" @tap="openLevels">星图册</view>
         <view class="btn-secondary half" @tap="openHelp">规则</view>
@@ -51,7 +49,7 @@
 
     <view class="footer">
       <text class="mute" @tap="toggleMute">{{ muted ? '🔇 静音中' : '🔊 音效开' }}</text>
-      <text class="ver">v1.1 · {{ LEVEL_COUNT }} 关</text>
+      <text class="ver">v1.3 · {{ LEVEL_COUNT }} 关</text>
     </view>
   </view>
 </template>
@@ -59,13 +57,17 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { loadProgress, emptyProgress, isUnlocked } from '../../core/star/progress.js'
+import { loadProgress, emptyProgress, isUnlocked, TEMP_UNLOCK_FROM } from '../../core/star/progress.js'
 import { LEVELS, LEVEL_COUNT } from '../../core/star/levelData.js'
 import { useSound } from '../../composables/useSound.js'
 
 const progress = ref(emptyProgress())
 const sound = useSound()
 const muted = computed(() => sound.muted.value)
+
+// [临时测试] 主按钮直接落到第 11 章起，测完与 progress.js 的 TEMP_UNLOCK_FROM 一起删
+const startId = computed(() => Math.min(Math.max(progress.value.cleared + 1, TEMP_UNLOCK_FROM), LEVEL_COUNT))
+const startLabel = computed(() => (progress.value.cleared > 0 ? `继续 · 第 ${startId.value} 关` : `开始观测 · 第 ${startId.value} 关`))
 
 onShow(() => {
   progress.value = loadProgress()
@@ -94,7 +96,10 @@ const skyStars = computed(() => {
 })
 
 function start() {
-  const target = LEVELS.find((l) => isUnlocked(progress.value, l.id) && !progress.value.stars[l.id])
+  // [临时测试] 第 11 章起直接开测：进度还没推进到 L65 时，跳过前十章
+  const floor = Math.max(progress.value.cleared + 1, TEMP_UNLOCK_FROM)
+  const target = LEVELS.find((l) => l.id >= floor && isUnlocked(progress.value, l.id) && !progress.value.stars[l.id])
+    || LEVELS.find((l) => l.id === floor)
     || LEVELS[0]
   uni.navigateTo({ url: `/pages/star/game?id=${target.id}` })
 }

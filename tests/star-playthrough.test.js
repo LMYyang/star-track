@@ -18,9 +18,9 @@ beforeEach(() => {
 })
 
 describe('全量通关演练', () => {
-  it('关卡数据装载为 64 关、十章', () => {
-    expect(LEVELS.length).toBe(64)
-    expect(STAR.chapters.length).toBe(10)
+  it('关卡数据装载为 132 关、十七章', () => {
+    expect(LEVELS.length).toBe(132)
+    expect(STAR.chapters.length).toBe(17)
   })
 
   it.each(LEVELS.map((l) => [l.id, l]))('第 %i 关：照目标集落点即可三星通关', (id, lv) => {
@@ -71,7 +71,7 @@ describe('全量通关演练', () => {
     expect(s.placedCount.value).toBe(0)
   })
 
-  it('提示给出的点一定是缺口里的目标点', () => {
+  it('提示给出的点一定是缺口里的目标点（零提示关按约定返回空）', () => {
     for (const lv of LEVELS) {
       const s = useStar(lv)
       s.markEntered()
@@ -80,6 +80,10 @@ describe('全量通关演练', () => {
       if (lv.arrows) s.setDir(first[2])
       s.tap({ x: first[0], y: first[1] })
       const h = s.hint()
+      if (lv.hints === 0) {
+        expect(h, `第 ${lv.id} 关零提示却给了提示`).toBe(null)
+        continue
+      }
       expect(h, `第 ${lv.id} 关提示为空`).toBeTruthy()
       const k = h.point.length === 3 ? h.point.join(',') : `${h.point[0]},${h.point[1]}`
       expect(lv.targets.has(k), `第 ${lv.id} 关提示点 ${k} 不在目标集`).toBe(true)

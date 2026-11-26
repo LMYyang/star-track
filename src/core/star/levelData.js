@@ -1,5 +1,6 @@
 // 关卡数据入口：唯一 import JSON 的地方（其余模块保持纯 JS，node 脚本可直接用）
-import raw from '../../data/levels.v2.json'
+// v1.2 起使用 levels.v4.json（64 关 + 第 11–14 章 32 关 = 96 关）；v1/v2 文件保留作历史
+import raw from '../../data/levels.v4.json'
 import { hydrateLevels } from './levels.js'
 
 export const STAR = hydrateLevels(raw)

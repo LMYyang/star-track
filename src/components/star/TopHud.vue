@@ -7,7 +7,7 @@
     </view>
     <view class="hud-center">
       <text class="hud-title">第 {{ levelId }} 关 · {{ levelName }}</text>
-      <text class="hud-sub">{{ chapterName }} · {{ symText }}</text>
+      <text class="hud-sub">{{ chapterName }} · {{ symText }}<text v-if="difficulty" class="diff"> · 难度 {{ difficulty }}/5</text></text>
     </view>
     <view class="hud-right">
       <text class="time">{{ timeText }}</text>
@@ -26,6 +26,7 @@ defineProps({
   symText: { type: String, default: '' },
   timeText: { type: String, default: '00:00' },
   bestStar: { type: Number, default: 0 },
+  difficulty: { type: Number, default: 0 },
 })
 defineEmits(['back'])
 </script>
@@ -52,6 +53,7 @@ defineEmits(['back'])
 .hud-center { flex: 1; display: flex; flex-direction: column; gap: 4rpx; }
 .hud-title { font-size: 30rpx; color: #ece9ff; font-weight: 600; }
 .hud-sub { font-size: 22rpx; color: #7d87a3; }
+.diff { color: #e3c07a; }
 .hud-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6rpx; }
 .time { font-size: 24rpx; color: #9aa3bb; font-variant-numeric: tabular-nums; }
 .stars { display: flex; gap: 4rpx; }

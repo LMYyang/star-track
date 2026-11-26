@@ -59,8 +59,16 @@ export function recordAttempt(p) {
   return { ...p, plays: (p.plays || 0) + 1, updatedAt: Date.now() }
 }
 
+/**
+ * [临时测试] 从第 11 章（L65）起直接可玩，不用从第 1 关打通。
+ * 只给自己验收新章用；测完删掉这个常量 + isUnlocked 里的那一行即可恢复原逻辑。
+ */
+export const TEMP_UNLOCK_FROM = 65
+
 /** 解锁：第 1 关永远可玩，其余要求上一关已通关 */
 export function isUnlocked(p, levelNo) {
+  // [临时测试] —— 见上方 TEMP_UNLOCK_FROM
+  if (levelNo >= TEMP_UNLOCK_FROM) return true
   return levelNo === 1 || p.cleared >= levelNo - 1
 }
 

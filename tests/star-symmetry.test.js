@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   normalizeSym, keyOf, groupOf, applyMat, applyDir, groupImages, imageOf,
-  axisCells, directionTable, DIR_KEYS,
+  axisCells, directionTable, DIR_KEYS, compose, fixedPointOf,
 } from '../src/core/star/symmetry.js'
 
 const SYMS = [
@@ -199,5 +199,106 @@ describe('symmetry / 方向翻折表', () => {
     const m = groupOf(sym)[1]
     expect(applyMat(m, [1, 0])).toEqual([0, 1])
     expect(applyDir(m, 'R')).toBe('D')
+  })
+})
+
+describe('复合双镜（第 11 章新元素）', () => {
+  const g = (a, b) => normalizeSym({ type: 'g', a, b })
+
+  it('斜轴 × 斜轴：群阶 4，一个源点补三点', () => {
+    const sym = g({ type: 'd1', c: 0 }, { type: 'd2', c: 6 })
+    expect(groupOf(sym).length).toBe(4)
+    expect(groupImages(sym, [1, 2]).map((p) => keyOf(p))).toEqual(['1,2', '2,1', '4,5', '5,4'])
+    // 四个元素互不相同，且各自二阶
+    for (const m of groupOf(sym)) {
+      const twice = compose(m, m)
+      // −0 与 0 视为相同（浮点合成可能带符号零）
+      const norm = [twice.a, twice.b, twice.c, twice.d, twice.tx, twice.ty].map((v) => (Object.is(v, -0) ? 0 : v))
+      expect(norm).toEqual([1, 0, 0, 1, 0, 0])
+    }
+  })
+
+  it('两轴交点（A·B 不动点）算轴格：不能落星', () => {
+    const sym = g({ type: 'd1', c: 0 }, { type: 'd2', c: 6 })
+    const axis = axisCells(sym, 7)
+    expect(fixedPointOf(groupOf(sym)[3])).toEqual([3, 3])
+    expect(axis.has('3,3')).toBe(true)      // 交点
+    expect(axis.has('0,0')).toBe(true)      // 斜轴 ╱
+    expect(axis.has('0,6')).toBe(true)      // 斜轴 ╲
+  })
+
+  it('不可交换的两条轴直接拒绝（{I,A,B,A·B} 不封闭）', () => {
+    expect(() => groupOf(g({ type: 'v', axis: 3 }, { type: 'd1', c: 0 }))).toThrow(/不可交换/)
+  })
+
+  it('子轴只能二阶：嵌套复合 / 旋转都拒绝', () => {
+    expect(() => normalizeSym({ type: 'g', a: { type: 'r', cx: 3, cy: 3 }, b: { type: 'd1', c: 0 } })).toThrow()
+    expect(() => normalizeSym({ type: 'g', a: { type: 'g', a: { type: 'v', axis: 2 }, b: { type: 'h', axis: 2 } }, b: { type: 'd1', c: 0 } })).toThrow()
+  })
+
+  it('方向也随两道斜镜翻两次：右 → 下 → 上 → 左', () => {
+    const sym = g({ type: 'd1', c: 0 }, { type: 'd2', c: 6 })
+    expect(applyDir(groupOf(sym)[1], 'R')).toBe('D')
+    expect(applyDir(groupOf(sym)[2], 'R')).toBe('U')
+    expect(applyDir(groupOf(sym)[3], 'R')).toBe('L')
+  })
+})
+
+describe('symmetry / 八重星芒 d4 与星阵平移 t', () => {
+  const d4 = (axis = 'v') => normalizeSym({ type: 'd4', cx: 4, cy: 4, axis })
+
+  it('d4 群阶为 8，元素互不相同且闭合', () => {
+    for (const axis of ['v', 'h', 'd1', 'd2']) {
+      const g8 = groupOf(d4(axis))
+      expect(g8).toHaveLength(8)
+      const set = new Set(g8.map((m) => [m.a, m.b, m.c, m.d, m.tx, m.ty].join('/')))
+      expect(set.size).toBe(8)
+    }
+  })
+
+  it('d4 一源补七点，且八个像绕中心成环', () => {
+    const sym = d4()
+    const imgs = groupImages(sym, [1, 2]).map((p) => p.join(','))
+    expect(imgs).toHaveLength(8)
+    expect(new Set(imgs).size).toBe(8)
+    expect(imgs).toEqual(['1,2', '6,1', '7,6', '2,7', '7,2', '6,7', '1,6', '2,1'])
+  })
+
+  it('d4 镜轴整条是轴格，中心也在轴上', () => {
+    const cells = axisCells(d4('v'), 9)
+    expect(cells.size).toBe(9)
+    for (let y = 0; y < 9; y++) expect(cells.has(`4,${y}`)).toBe(true)
+    expect(axisCells(d4('d1'), 9).size).toBe(9)
+    expect(axisCells(d4('d2'), 9).size).toBe(9)
+    expect(axisCells(d4('h'), 9).size).toBe(9)
+    expect(axisCells(d4('d1'), 9).has('4,4')).toBe(true)
+  })
+
+  it('d4 方向：转 90° 右→下，镜轴把方向翻回去', () => {
+    const g8 = groupOf(d4())
+    expect(applyDir(g8[1], 'R')).toBe('D')
+    expect(applyDir(g8[4], 'R')).toBe('L') // 竖轴镜像
+  })
+
+  it('d4 中心必须落在格点或格心，非法镜轴拒绝', () => {
+    expect(() => normalizeSym({ type: 'd4', cx: 4, cy: 5.5, axis: 'v' })).toThrow()
+    expect(() => normalizeSym({ type: 'd4', cx: 4, cy: 4, axis: 'p' })).toThrow()
+    expect(() => normalizeSym({ type: 'd4', cx: 4, cy: 4, axis: 'r' })).toThrow()
+  })
+
+  it('t 群阶 = 步数 + 1，逐格平移且不改变方向', () => {
+    const sym = normalizeSym({ type: 't', vx: 1, vy: 2, steps: 2 })
+    expect(groupOf(sym)).toHaveLength(3)
+    expect(groupImages(sym, [1, 1])).toEqual([[1, 1], [2, 3], [3, 5]])
+    for (let i = 0; i < 3; i++) expect(applyDir(groupOf(sym)[i], 'R')).toBe('R')
+    expect(axisCells(sym, 9).size).toBe(0)
+  })
+
+  it('t 参数非法时报错：零向量 / 非整数 / 步数越界', () => {
+    expect(() => normalizeSym({ type: 't', vx: 0, vy: 0 })).toThrow()
+    expect(() => normalizeSym({ type: 't', vx: 1.5, vy: 0 })).toThrow()
+    expect(() => normalizeSym({ type: 't', vx: 1, vy: 1, steps: 0 })).toThrow()
+    expect(() => normalizeSym({ type: 't', vx: 1, vy: 1, steps: 4 })).toThrow()
+    expect(normalizeSym({ type: 't', vx: -2, vy: 0 })).toMatchObject({ vx: -2, vy: 0, steps: 1 })
   })
 })

@@ -25,6 +25,9 @@
         <view class="rot-tick t3" />
       </view>
 
+      <!-- 星阵平移：从首颗源星沿向量拉一条虚线箭头，提示复制方向与步数 -->
+      <view v-if="shiftArrow" class="shift-arrow" :style="shiftArrow.style" />
+
       <!-- 暗域：落不下星的暗斑格 -->
       <view
         v-for="(b, i) in blocked"
@@ -89,7 +92,7 @@
 
 <script setup>
 import { computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue'
-import { keyOf } from '../../core/star/symmetry.js'
+import { keyOf, groupOf, fixedPointOf } from '../../core/star/symmetry.js'
 
 const props = defineProps({
   level: { type: Object, required: true },
@@ -123,10 +126,10 @@ const sources = computed(() => props.level.sources)
 const strays = computed(() => props.level.strays)
 const blocked = computed(() => props.level.blockedList || [])
 
-/** 旋转中心环（仅 r 类型） */
+/** 旋转中心环（r 与 d4 共用） */
 const rotRing = computed(() => {
   const s = props.level.sym
-  if (!s || s.type !== 'r') return null
+  if (!s || (s.type !== 'r' && s.type !== 'd4')) return null
   const d = step.value * 1.15
   return {
     left: px(s.hx / 2) + 'px',
@@ -136,32 +139,59 @@ const rotRing = computed(() => {
   }
 })
 
-/** 对称轴线段（像素坐标），支持竖/横/两条斜轴/中心点 */
-const rays = computed(() => {
-  const s = props.level.sym
+/** 对称轴线段（像素坐标），支持竖/横/两条斜轴/中心点/复合双镜 */
+const rays = computed(() => raySegs(props.level.sym))
+
+function raySegs(sym) {
+  if (!sym) return []
   const P = pad.value
   const S = step.value
   const N = n.value
   const seg = (x1, y1, x2, y2) => ({ x1, y1, x2, y2 })
-  if (s.type === 'r') return [] // 旋转没有轴，只画中心环
-  if (s.type === 'v') return [seg(px(s.hx / 2), 0, px(s.hx / 2), props.size)]
-  if (s.type === 'h') return [seg(0, px(s.hy / 2), props.size, px(s.hy / 2))]
-  if (s.type === 'cross') {
+  const cross = (cx, cy, L) => [seg(cx, cy - L, cx, cy + L), seg(cx - L, cy, cx + L, cy)]
+
+  if (sym.type === 'g') {
+    // 复合双镜：两条子轴各自成线，再加一个两轴交点处的准星（A·B 的不动点）
+    const out = [...raySegs(sym.a), ...raySegs(sym.b)]
+    const fp = fixedPointOf(groupOf(sym)[3])
+    if (fp && fp[0] >= 0 && fp[0] < N && fp[1] >= 0 && fp[1] < N) {
+      out.push(...cross(px(fp[0]), px(fp[1]), S * 0.34))
+    }
+    return out
+  }
+  if (sym.type === 'r') return [] // 旋转没有轴，只画中心环
+  if (sym.type === 'd4') {
+    // 八重星芒：旋转中心环 + 过中心的镜轴
+    const cx = sym.hx / 2
+    const cy = sym.hy / 2
+    if (sym.axis === 'v') return [seg(px(cx), 0, px(cx), props.size)]
+    if (sym.axis === 'h') return [seg(0, px(cy), props.size, px(cy))]
+    if (sym.axis === 'd1') {
+      const c = cy - cx
+      const xa = Math.max(0, -c)
+      const xb = Math.min(N - 1, N - 1 - c)
+      return [seg(px(xa), px(xa + c), px(xb), px(xb + c))]
+    }
+    const c = cx + cy
+    const xa = Math.max(0, c - (N - 1))
+    const xb = Math.min(N - 1, c)
+    return [seg(px(xa), px(c - xa), px(xb), px(c - xb))]
+  }
+  if (sym.type === 'v') return [seg(px(sym.hx / 2), 0, px(sym.hx / 2), props.size)]
+  if (sym.type === 'h') return [seg(0, px(sym.hy / 2), props.size, px(sym.hy / 2))]
+  if (sym.type === 'cross') {
     const out = []
-    if (s.hx % 2 === 0) out.push(seg(px(s.hx / 2), 0, px(s.hx / 2), props.size))
-    if (s.hy % 2 === 0) out.push(seg(0, px(s.hy / 2), props.size, px(s.hy / 2)))
+    if (sym.hx % 2 === 0) out.push(seg(px(sym.hx / 2), 0, px(sym.hx / 2), props.size))
+    if (sym.hy % 2 === 0) out.push(seg(0, px(sym.hy / 2), props.size, px(sym.hy / 2)))
     if (out.length === 0) out.push(seg(P, P, props.size - P, props.size - P))
     return out
   }
-  if (s.type === 'p') {
+  if (sym.type === 'p') {
     // 中心对称没有线，画一个十字准星
-    const cx = px(s.hx / 2)
-    const cy = px(s.hy / 2)
-    const L = S * 0.3
-    return [seg(cx, cy - L, cx, cy + L), seg(cx - L, cy, cx + L, cy)]
+    return cross(px(sym.hx / 2), px(sym.hy / 2), S * 0.3)
   }
-  const c = s.c
-  if (s.type === 'd1') {
+  const c = sym.c
+  if (sym.type === 'd1') {
     const xa = Math.max(0, -c)
     const xb = Math.min(N - 1, N - 1 - c)
     return [seg(px(xa), px(xa + c), px(xb), px(xb + c))]
@@ -170,10 +200,33 @@ const rays = computed(() => {
   const xa = Math.max(0, c - (N - 1))
   const xb = Math.min(N - 1, c)
   return [seg(px(xa), px(c - xa), px(xb), px(c - xb))]
+}
+/** 星阵平移箭头：从首颗源星出发，沿 (vx, vy) 拉满 steps 的虚线 + 箭头 */
+const shiftArrow = computed(() => {
+  const s = props.level.sym
+  if (!s || s.type !== 't') return null
+  const src = props.level.sources && props.level.sources[0]
+  if (!src) return null
+  const S = step.value
+  const x1 = px(src[0])
+  const y1 = px(src[1])
+  const x2 = x1 + s.vx * S * s.steps
+  const y2 = y1 + s.vy * S * s.steps
+  const len = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+  const angle = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI
+  return {
+    style: {
+      left: `${x1}px`,
+      top: `${y1 - 1}px`,
+      width: `${len}px`,
+      transform: `rotate(${angle}deg)`,
+      transformOrigin: '0 50%',
+    },
+    head: { transform: `rotate(${angle}deg)` },
+  }
 })
 
-function rayStyle(r) {
-  const dx = r.x2 - r.x1
+function rayStyle(r) {  const dx = r.x2 - r.x1
   const dy = r.y2 - r.y1
   const len = Math.sqrt(dx * dx + dy * dy)
   const angle = (Math.atan2(dy, dx) * 180) / Math.PI
@@ -311,6 +364,26 @@ function handle({ cx, cy }) {
   box-shadow: 0 0 18rpx rgba(227, 192, 122, 0.45);
   transform-origin: 50% 50%;
   pointer-events: none;
+}
+
+/* 星阵平移参考箭头：金色虚线 + 末端三角，提示复制方向 */
+.shift-arrow {
+  position: absolute;
+  height: 0;
+  border-top: 3rpx dashed rgba(227, 192, 122, 0.5);
+  pointer-events: none;
+  z-index: 2;
+}
+.shift-arrow::after {
+  content: '';
+  position: absolute;
+  right: -10rpx;
+  top: -9rpx;
+  width: 0;
+  height: 0;
+  border-left: 14rpx solid rgba(227, 192, 122, 0.62);
+  border-top: 7rpx solid transparent;
+  border-bottom: 7rpx solid transparent;
 }
 
 /* 源星：四芒星 */

@@ -20,7 +20,7 @@
     </view>
 
     <view class="card">
-      <text class="h">七种对称关系</text>
+      <text class="h">十种对称关系</text>
       <view v-for="it in SYMS" :key="it.name" class="sym-row">
         <text class="sym-name">{{ it.name }}</text>
         <text class="sym-formula">{{ it.formula }}</text>
@@ -47,6 +47,30 @@
       <text class="h">旋转对称（第八章起）</text>
       <text class="p">金色虚线圆环是旋转中心：整张星图绕它顺时针转 90° 后要跟原来一模一样。一个源点会转出三颗，分别在右、下、左，四颗连起来是一个方环。</text>
       <text class="p dim">中心落在格点上时，那一格是死点，不能落星；中心落在格心时没有死点。</text>
+    </view>
+
+    <view class="card">
+      <text class="h">双镜（第十一章起）</text>
+      <text class="p">两道斜镜交叉成 X：先按 ╱ 翻一次、再按 ╲ 翻一次，第三种像是绕两轴交点转 180°。一个源点要补三颗，散落在四个角区里。</text>
+      <text class="p dim">两轴的交点是死点，不能落星；只有可交换的两条轴才成立，所以双镜只出现在斜轴 × 斜轴这一类。</text>
+    </view>
+
+    <view class="card">
+      <text class="h">星芒（第十五章起）</text>
+      <text class="p">旋转中心 + 过中心的镜轴，合成 8 阶对称群：一个源点补七颗——先绕中心转出 90°/180°/270° 三颗，再把这四颗各自照镜子。</text>
+      <text class="p dim">镜轴整条都是死格，圆心也落在轴上；先在环上数清位置，再落子。</text>
+    </view>
+
+    <view class="card">
+      <text class="h">星阵（第十六章起）</text>
+      <text class="p">不是翻转而是复制：每颗源星沿向量 (vx, vy) 平移，复制出第 1 颗、第 2 颗……最多三步。棋盘上那条虚线箭头就是复制方向。</text>
+      <text class="p dim">复制不能越板边：靠边的星只能朝板内方向放源点；步数写在标题栏「×N」里。</text>
+    </view>
+
+    <view class="card">
+      <text class="h">限次与盲判（第十三章起）</text>
+      <text class="p">从第 13 章开始提交次数只剩 2–3 次，用完即失败；「盲判」关连偏差几处都不告诉你，只回一句「还没对齐」。</text>
+      <text class="p dim">别急着提交：先把整张图补完再点提交，一关最多只有两次机会。</text>
     </view>
 
     <view class="card">
@@ -82,6 +106,9 @@ const SYMS = [
   { name: '中心', formula: '(x, y) → (2cx − x, 2cy − y)', tip: '左右上下同时反' },
   { name: '双轴', formula: '竖 + 横的四像', tip: '一个点补三点' },
   { name: '旋转', formula: '(x, y) → (cx − (y − cy), cy + (x − cx))', tip: '绕中心顺时针 90°' },
+  { name: '双镜', formula: '╱ 翻 + ╲ 翻的四像', tip: '斜轴 × 斜轴，一源补三' },
+  { name: '星芒', formula: '旋转 90° 四像 × 过中心镜轴', tip: '8 阶群，一源补七' },
+  { name: '星阵', formula: '(x, y) → (x + kvx, y + kvy)', tip: '平移复制第 k 颗' },
 ]
 
 function back() {

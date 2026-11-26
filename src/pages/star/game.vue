@@ -7,6 +7,7 @@
       :sym-text="symText"
       :time-text="timeText"
       :best-star="bestStar"
+      :difficulty="diff"
       @back="onBack"
     />
 
@@ -75,6 +76,7 @@ import ResultSheet from '../../components/star/ResultSheet.vue'
 import GuideOverlay from '../../components/star/GuideOverlay.vue'
 import { useStar } from '../../composables/useStar.js'
 import { LEVEL_MAP, LEVELS, CHAPTERS } from '../../core/star/levelData.js'
+import { difficultyOf } from '../../core/star/levels.js'
 import { starOf } from '../../core/star/progress.js'
 
 const GUIDE_KEY = 'startrack_guide_seen_v1'
@@ -118,11 +120,26 @@ const symText = computed(() => {
   if (s.type === 'p') return `中心 (${s.hx / 2}, ${s.hy / 2})`
   if (s.type === 'cross') return `十字 (${s.hx / 2}, ${s.hy / 2})`
   if (s.type === 'r') return `旋转 90° (${s.hx / 2}, ${s.hy / 2})`
+  if (s.type === 'g') {
+    const a = s.a.type === 'd1' ? `╱${s.a.c}` : s.a.type === 'd2' ? `╲${s.a.c}` : s.a.type
+    const b = s.b.type === 'd1' ? `╱${s.b.c}` : s.b.type === 'd2' ? `╲${s.b.c}` : s.b.type
+    return `双镜 ${a} + ${b}`
+  }
   if (s.type === 'd1') return `斜轴 y = x + ${s.c}`
+  if (s.type === 'd4') {
+    const ax = { v: '竖轴', h: '横轴', d1: '╱', d2: '╲' }[s.axis]
+    return `八重 (${s.hx / 2}, ${s.hy / 2}) · ${ax}`
+  }
+  if (s.type === 't') {
+    const sx = s.vx === 0 ? '' : s.vx > 0 ? '→' : '←'
+    const sy = s.vy === 0 ? '' : s.vy > 0 ? '↓' : '↑'
+    return `平移 ${sy}${sx}(${s.vx}, ${s.vy})×${s.steps}`
+  }
   return `斜轴 x + y = ${s.c}`
 })
 
 const bestStar = computed(() => starOf(progress.value, level.value.id))
+const diff = computed(() => difficultyOf(level.value))
 const nextId = computed(() => (level.value.id < LEVELS.length ? level.value.id + 1 : 0))
 
 // ---- 尺寸：正方形星域，按窗口与剩余高度取小 ----
@@ -291,6 +308,62 @@ const GUIDE_TEXT = {
       '箭头星在旋转关里，方向会跟着一起转 90°：上→右→下→左。',
       '一颗源星的三个像，方向各不相同，不能只按一个方向补。',
       '先在下方选定方向，再落点，逐颗核对。',
+    ],
+  },
+  65: {
+    title: '双镜：两道斜轴',
+    lines: [
+      '这次是两条斜轴交叉成 X：「╱」翻一次、「╲」翻一次，第三次是绕交点转 180°。',
+      '一个源点要补三颗，分别落在斜轴分出的另外三个角区里。',
+      '两轴的交点是死点，不能落星；沿轴数格比在心里硬翻更稳。',
+    ],
+  },
+  73: {
+    title: '深井：暗域密集',
+    lines: [
+      '九宫大板上出现了成片暗域——那里点不进去，星也落不下。',
+      '暗域会把目标点位挤到板边，先找到离轴最近的空位再往外补。',
+      '若把自己补进暗域，会直接被弹回，不消耗失误。',
+    ],
+  },
+  81: {
+    title: '星锁：限次提交',
+    lines: [
+      '从这章起提交次数只剩 2–3 次，用完就失败，别再「试一下看看」。',
+      '补完整张图、逐颗核对过再点提交；错了就撤销重补，不浪费提交。',
+      '提示也只剩 0–1 次，留在最没把握的那颗星上。',
+    ],
+  },
+  89: {
+    title: '万象：盲判',
+    lines: [
+      '最后一章只会告诉你「通过 / 还没对齐」，不再报偏差几处。',
+      '双镜、暗域、残星、箭头会同时出现，先补源点的三种像，再核对残星有没有被误镜像。',
+      '只有两次提交机会，全部核对完再提交。',
+    ],
+  },
+  97: {
+    title: '星芒：一源七像',
+    lines: [
+      '圆环是旋转中心，十字线是过中心的镜轴——两者合起来是一个 8 阶的对称群。',
+      '一个源点要补七颗：先转 90°/180°/270° 得三颗，再把这四颗各自照镜子又得四颗。',
+      '镜轴整条都不能落星，圆心也在轴上；先数清环上的位置再落子。',
+    ],
+  },
+  109: {
+    title: '星阵：平移复制',
+    lines: [
+      '这次不是翻转，而是复制：每颗源星都要沿箭头方向平移 (vx, vy) 复制出后续几颗。',
+      '箭头末端有几段就复制几次，每隔一整格都算一颗，方向、距离都要数准。',
+      '复制不能越板边，靠边的星只能往板内方向放源点；虚线只提示方向，不告诉你具体补几颗。',
+    ],
+  },
+  121: {
+    title: '终局·二：全元素',
+    lines: [
+      '星芒、星阵、双镜、旋转、暗域、残星、箭头全混在一起，而且全部盲判。',
+      '先按「一个源点补几颗」判断是哪套对称，再逐个格位核对。',
+      '提交只有两次，宁可撤销重补也不要盲交。',
     ],
   },
 }

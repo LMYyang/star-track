@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { validateAll } from '../src/core/star/validate.js'
-import { hydrateLevels, rateStar, CHAPTERS } from '../src/core/star/levels.js'
+import { hydrateLevels, rateStar, CHAPTERS, difficultyOf } from '../src/core/star/levels.js'
 import { groupOrder } from '../src/core/star/symmetry.js'
 import { LEVELS } from '../src/core/star/levelData.js'
 import { RAW } from './helpers.js'
@@ -23,24 +23,27 @@ describe('levels / 数据完整性', () => {
     }
   })
 
-  it('十章分组，每章非空', () => {
-    expect(CHAPTERS).toHaveLength(10)
-    expect(STAR.chapters).toHaveLength(10)
+  it('十七章分组，每章非空', () => {
+    expect(CHAPTERS).toHaveLength(17)
+    expect(STAR.chapters).toHaveLength(17)
     for (const c of STAR.chapters) expect(c.levels.length).toBeGreaterThan(0)
     expect(STAR.chapters.map((c) => c.levels.length).reduce((a, b) => a + b, 0)).toBe(STAR.levels.length)
   })
 
-  it('板面只用 5/7/9，源点 2~8 个', () => {
+  it('板面只用 5/7/9，源点 1~8 个（八重星芒允许单源点）', () => {
     for (const l of STAR.levels) {
       expect([5, 7, 9]).toContain(l.board)
-      expect(l.sources.length).toBeGreaterThanOrEqual(2)
+      expect(l.sources.length).toBeGreaterThanOrEqual(1)
       expect(l.sources.length).toBeLessThanOrEqual(8)
     }
   })
 
-  it('难度单调：前 3 关不限提交次数，之后逐步收紧', () => {
+  it('难度单调：前 3 关不限提交次数，最后一关压到 2 次', () => {
     expect(STAR.levels.slice(0, 3).every((l) => l.moves === 99)).toBe(true)
-    expect(STAR.levels.at(-1).moves).toBe(3)
+    expect(STAR.levels.at(-1).moves).toBe(2)
+    // 新章 11–14 的提交次数整体比前十章更紧
+    const avg = (arr) => arr.reduce((s, l) => s + Math.min(l.moves, 9), 0) / arr.length
+    expect(avg(STAR.levels.filter((l) => l.chapter >= 11))).toBeLessThan(avg(STAR.levels.filter((l) => l.chapter <= 10 && l.moves < 99)))
   })
 
   it('残星只出现在第六章及以后', () => {
@@ -102,7 +105,7 @@ describe('levels / 数据完整性', () => {
 describe('levels / 新章节结构', () => {
   it('总关卡数与数据入口一致', () => {
     expect(STAR.levels.length).toBe(LEVELS.length)
-    expect(LEVELS.length).toBe(64)
+    expect(LEVELS.length).toBe(132)
   })
 
   it('第 8/9/10 章关卡数分别为 7/8/9', () => {
@@ -112,6 +115,107 @@ describe('levels / 新章节结构', () => {
     expect(STAR.chapters.find((c) => c.no === 8).levels.length).toBe(7)
     expect(STAR.chapters.find((c) => c.no === 9).levels.length).toBe(8)
     expect(STAR.chapters.find((c) => c.no === 10).levels.length).toBe(9)
+  })
+
+  it('第 11–14 章各 8 关，且都在第 65 关之后', () => {
+    for (const no of [11, 12, 13, 14]) {
+      const ch = STAR.chapters.find((c) => c.no === no)
+      expect(ch, `缺少第 ${no} 章`).toBeTruthy()
+      expect(ch.levels.length).toBe(8)
+      expect(ch.levels.every((l) => l.id >= 65 && l.chapter === no)).toBe(true)
+    }
+    expect(STAR.byId.get(65).chapter).toBe(11)
+    expect(STAR.byId.get(96).chapter).toBe(14)
+  })
+
+  it('第 11 章「双镜」：复合双轴群阶为 4，目标全在格点上', () => {
+    const dual = STAR.levels.filter((l) => l.sym.type === 'g')
+    expect(dual.length).toBeGreaterThanOrEqual(8)
+    for (const l of dual) {
+      expect(groupOrder(l.sym)).toBe(4)
+      expect(l.targetCount).toBe(l.sources.length * 3)
+      for (const { p } of l.targets.values()) {
+        expect(Number.isInteger(p[0])).toBe(true)
+        expect(Number.isInteger(p[1])).toBe(true)
+      }
+      // 两条子轴都不是复合/旋转，且都真的参与映射
+      expect(['v', 'h', 'p', 'd1', 'd2'].includes(l.sym.a.type)).toBe(true)
+      expect(['v', 'h', 'p', 'd1', 'd2'].includes(l.sym.b.type)).toBe(true)
+    }
+  })
+
+  it('难度系数 1–5：末关为 5，新章整体高于前十章', () => {
+    for (const l of STAR.levels) {
+      const d = difficultyOf(l)
+      expect(Number.isInteger(d)).toBe(true)
+      expect(d).toBeGreaterThanOrEqual(1)
+      expect(d).toBeLessThanOrEqual(5)
+    }
+    expect(difficultyOf(STAR.byId.get(132))).toBe(5)
+    const avg = (arr) => arr.reduce((s, l) => s + difficultyOf(l), 0) / arr.length
+    expect(avg(STAR.levels.filter((l) => l.chapter >= 11))).toBeGreaterThan(
+      avg(STAR.levels.filter((l) => l.chapter <= 10)),
+    )
+  })
+
+  it('第 13/14 章难度收紧：提交次数 ≤3、部分关零提示/盲判', () => {
+    const hard = STAR.levels.filter((l) => l.chapter === 13 || l.chapter === 14)
+    expect(hard.length).toBe(16)
+    expect(hard.every((l) => l.moves <= 3)).toBe(true)
+    expect(hard.some((l) => l.hints === 0)).toBe(true)
+    expect(hard.some((l) => l.showMismatch === false)).toBe(true)
+    expect(hard.every((l) => l.arrows)).toBe(true)
+  })
+
+  it('第 15–17 章各 12 关，位于第 97–132 关', () => {
+    for (const no of [15, 16, 17]) {
+      const ch = STAR.chapters.find((c) => c.no === no)
+      expect(ch, `缺少第 ${no} 章`).toBeTruthy()
+      expect(ch.levels.length).toBe(12)
+      expect(ch.levels.every((l) => l.chapter === no)).toBe(true)
+    }
+    expect(STAR.byId.get(97).chapter).toBe(15)
+    expect(STAR.byId.get(109).chapter).toBe(16)
+    expect(STAR.byId.get(121).chapter).toBe(17)
+    expect(STAR.byId.get(132).chapter).toBe(17)
+  })
+
+  it('第 15 章「星芒」：八重群阶为 8，一源补七点，全在格点', () => {
+    const d4s = STAR.levels.filter((l) => l.sym.type === 'd4')
+    expect(d4s.length).toBeGreaterThanOrEqual(12)
+    for (const l of d4s) {
+      expect(groupOrder(l.sym)).toBe(8)
+      expect(l.targetCount).toBe(l.sources.length * 7)
+      for (const { p } of l.targets.values()) {
+        expect(Number.isInteger(p[0])).toBe(true)
+        expect(Number.isInteger(p[1])).toBe(true)
+      }
+      expect(['v', 'h', 'd1', 'd2']).toContain(l.sym.axis)
+      // 镜轴整条是死格
+      expect(l.axisCells.size).toBeGreaterThan(0)
+    }
+  })
+
+  it('第 16 章「星阵」：平移群阶 = 步数 + 1，目标 = 源点 × 步数', () => {
+    const ts = STAR.levels.filter((l) => l.sym.type === 't')
+    expect(ts.length).toBeGreaterThanOrEqual(12)
+    for (const l of ts) {
+      expect(groupOrder(l.sym)).toBe(l.sym.steps + 1)
+      expect(l.targetCount).toBe(l.sources.length * l.sym.steps)
+      expect(l.axisCells.size).toBe(0)
+      expect(Math.abs(l.sym.vx) + Math.abs(l.sym.vy)).toBeGreaterThan(0)
+    }
+  })
+
+  it('第 17 章「终局·二」：全部盲判、提交 2 次、暗域与残星齐上', () => {
+    const end = STAR.levels.filter((l) => l.chapter === 17)
+    expect(end.length).toBe(12)
+    expect(end.every((l) => l.showMismatch === false)).toBe(true)
+    expect(end.every((l) => l.moves === 2 && l.hints === 0)).toBe(true)
+    expect(end.every((l) => l.arrows)).toBe(true)
+    expect(end.every((l) => l.blockedList.length >= 2)).toBe(true)
+    expect(end.every((l) => l.strays.length >= 1)).toBe(true)
+    expect(difficultyOf(end.at(-1))).toBe(5)
   })
 })
 

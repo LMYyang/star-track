@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { validateAll } from '../src/core/star/validate.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const FILE = process.argv[2] || path.join(ROOT, 'src', 'data', 'levels.v2.json')
+const FILE = process.argv[2] || path.join(ROOT, 'src', 'data', 'levels.v4.json')
 
 const data = JSON.parse(fs.readFileSync(FILE, 'utf8'))
 const { ok, errors, levels } = validateAll(data)
@@ -24,6 +24,9 @@ const symLabel = (l) => {
   if (s.type === 'p') return `p(${s.hx / 2},${s.hy / 2})`
   if (s.type === 'cross') return `cross(${s.hx / 2},${s.hy / 2})`
   if (s.type === 'r') return `rot(${s.hx / 2},${s.hy / 2})`
+  if (s.type === 'g') return `dual(${s.a.type}+${s.b.type})`
+  if (s.type === 'd4') return `d4(${s.hx / 2},${s.hy / 2},${s.axis})`
+  if (s.type === 't') return `t(${s.vx},${s.vy})×${s.steps}`
   return `${s.type} c=${s.c}`
 }
 

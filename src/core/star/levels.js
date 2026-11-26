@@ -14,6 +14,13 @@ export const CHAPTERS = [
   { no: 8, name: '星旋', tag: '四重旋转', desc: '绕中心转 90°，一个点绕出三颗' },
   { no: 9, name: '暗域', tag: '禁落星格', desc: '暗斑处落不下星，只能绕开' },
   { no: 10, name: '织星', tag: '综合终章', desc: '旋转、残星、暗域与方向一起上' },
+  { no: 11, name: '双镜', tag: '斜轴 × 斜轴', desc: '两道斜镜交叉，一个点补三点' },
+  { no: 12, name: '深井', tag: '九宫暗域', desc: '大板加密集暗域，先找落脚点' },
+  { no: 13, name: '星锁', tag: '限次盲判', desc: '提交次数少、还能查偏差' },
+  { no: 14, name: '万象', tag: '终局', desc: '双镜、暗域、残星、箭头、盲判全开' },
+  { no: 15, name: '星芒', tag: '八重对称', desc: '旋转叠镜轴，一点补七颗' },
+  { no: 16, name: '星阵', tag: '平移复制', desc: '整片星图沿向量复制，看清方向和步数' },
+  { no: 17, name: '终局·二', tag: '全元素极限', desc: '星芒、星阵与全部旧元素混排，盲判收官' },
 ]
 
 /**
@@ -107,6 +114,13 @@ export function hydrateLevel(raw) {
   level.targets = deriveTargets(level)
   level.targetCount = level.targets.size
 
+  // 目标必须落在整数格点上：复合双镜若配上奇偶不匹配的轴，像会落到半格，无法落星
+  for (const { p } of level.targets.values()) {
+    if (!Number.isInteger(p[0]) || !Number.isInteger(p[1])) {
+      throw new Error(`关卡 ${level.id}: 目标 ${keyOf(p)} 不在格点上`)
+    }
+  }
+
   // 箭头关：一个格点只能落一颗星，若同一格需要两个方向，玩家永远补不出来
   if (level.arrows) {
     const pos = new Set()
@@ -165,4 +179,23 @@ export function rateStar({ pass, mistakes, hintsUsed }) {
   if (mistakes === 0 && hintsUsed === 0) return 3
   if (mistakes <= 2 && hintsUsed <= 1) return 2
   return 1
+}
+
+/**
+ * 难度系数 1–5（供 UI 标注，也让「加难度」有可量化的口径）：
+ * 目标数、暗域、残星、箭头、零提示、提交次数收紧，各计 1 分，封顶 5。
+ */
+export function difficultyOf(level) {
+  let score = 1
+  if (level.targetCount >= 6) score += 1
+  if (level.targetCount >= 9) score += 1
+  if (level.targetCount >= 15) score += 1
+  if (level.targetCount >= 21) score += 1
+  if ((level.blockedList || []).length >= 4) score += 1
+  if ((level.strays || []).length >= 2) score += 1
+  if (level.arrows) score += 1
+  if (level.hints === 0) score += 1
+  if (level.moves <= 2) score += 1
+  if (level.sym && level.sym.type === 'd4') score += 1
+  return Math.max(1, Math.min(5, score))
 }

@@ -62,20 +62,28 @@ const unlockedOf = (id) => isUnlocked(progress.value, id)
 const starsOf = (id) => starOf(progress.value, id)
 const chapterStarsOf = (c) => chapterStars(progress.value, c.levels)
 
-/** 关卡角标：矢=箭头 残=残星 障=暗域 旋=旋转 综=多机制叠加 */
+/** 关卡角标：矢=箭头 残=残星 障=暗域 旋=旋转 双=复合双镜 综=多机制叠加 */
 function tagOf(l) {
+  if (l.arrows && l.blockedList.length) return '综'
   if (l.arrows) return '矢'
   if (l.strays.length && l.blockedList.length) return '综'
   if (l.blockedList.length) return '障'
   if (l.strays.length) return '残'
+  if (l.sym.type === 'g') return '双'
+  if (l.sym.type === 'd4') return '芒'
+  if (l.sym.type === 't') return '阵'
   if (l.sym.type === 'r') return '旋'
   return ''
 }
 function tagClassOf(l) {
+  if (l.arrows && l.blockedList.length) return 'mix'
   if (l.arrows) return 'arrow'
   if (l.strays.length && l.blockedList.length) return 'mix'
   if (l.blockedList.length) return 'block'
   if (l.strays.length) return 'stray'
+  if (l.sym.type === 'g') return 'dual'
+  if (l.sym.type === 'd4') return 'mang'
+  if (l.sym.type === 't') return 'shift'
   if (l.sym.type === 'r') return 'rot'
   return ''
 }
@@ -180,6 +188,9 @@ function back() {
 .tag-stray { color: #8c9ec4; }
 .tag-block { color: #b48ce0; }
 .tag-rot { color: #e3c07a; }
+.tag-dual { color: #8fd6ff; }
+.tag-mang { color: #ffc46b; }
+.tag-shift { color: #b6a6ff; }
 .tag-mix { color: #7fe0c8; }
 .bottom-space { height: calc(env(safe-area-inset-bottom) + 40rpx); }
 </style>
